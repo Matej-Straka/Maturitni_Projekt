@@ -30,7 +30,7 @@ Přínos práce spočívá jednak v praktickém využití – aplikace poskytne 
 - Otestování aplikace z pohledu uživatele i administrátora.  
 
 ## Konkurenční řešení
-Existuje několik aplikací a platforem, které nabízejí podobné funkce propojení fyzických produktů s digitálním obsahem. Příkladem je **Bring Your Wine to Life**, aplikace od výrobce vín Tussock Jumper, která po načtení obrázku na obalu vína spustí k vínu 3d video v rozšířené realitě. Dalším produktem byl   
+Jsou některé aplikace, které nabízejí podobné funkce propojení fyzických produktů s digitálním obsahem. Příkladem je **Bring Your Wine to Life**, aplikace od výrobce vín Tussock Jumper, která po načtení obrázku na obalu vína spustí k vínu 3d video v rozšířené realitě. Další aplikací je **Smartify**, která umožňuje naskenovat umělecké dílo a získat tak informace o autorovi a díle. Dalším příkladem je 
 
 Oproti těmto řešením bude má aplikace jednodušší, přizpůsobená konkrétnímu účelu – prezentaci směsí kávy – a doplněná vlastním administračním prostředím.
 
