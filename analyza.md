@@ -1,32 +1,39 @@
 # Název práce
-##### Aplikace pro přehrávání videí pomocí obalu kávy  
+##### Mobilní aplikace pro prezentaci produktů pomocí QR kódů  
 
 ## Autor
-##### Matěj Straka  
+Matěj Straka  
 
 ## Cíl práce
-Cílem mé práce je vytvořit aplikaci, která umožní uživateli přehrát konkrétní video po načtení obalu kávy. Princip fungování bude postaven na využití QR kódů, případně rozšířené reality, kdy aplikace rozpozná přímo obrázek obalu a při jeho sejmutí kamerou se okamžitě zobrazí propojený multimediální obsah. Součástí projektu bude nejen mobilní aplikace, ale také administrační prostředí, které umožní spravovat databázi obalů, nahrávat odkazy na videa a přiřazovat k nim buď QR kódy, nebo obrázky.  
+Cílem maturitní práce je navrhnout, naprogramovat a otestovat mobilní aplikaci, která bude sloužit k prezentaci směsí kávy prostřednictvím QR kódů. Po načtení QR kódu pomocí kamery mobilního zařízení se přehraje příslušné video, které bude propojeno s konkrétní směsí kávy. Po skončení videa se v aplikaci zobrazí dvě tlačítka: **Složení**, které uživateli ukáže detailní složení směsi, a **Více informací**, kde se objeví rozšířený textový popis produktu.  
 
-Aplikace bude vyvíjena v programovacím jazyce **Dart** za použití frameworku **Flutter**, který umožňuje vytvářet multiplatformní aplikace s moderním uživatelským rozhraním. Tento výběr technologií mi poskytne možnost osvojit si aktuálně používané nástroje v oblasti vývoje mobilních aplikací.  
+Součástí práce je také vytvoření administračního rozhraní pro správu obsahu. V administraci bude možné přiřazovat k jednotlivým QR kódům videa, texty se složením a popisy produktů. Dále zde bude správa uživatelských účtů s možností přidávání, mazání a úprav přístupových práv.  
 
-Minimálním produktem je aplikace, která dokáže sejmutím QR kódu spustit příslušné video, ale cílem je jít dále a umožnit i rozšíření o rozpoznávání přímo podle obalu kávy.  
+Aplikace bude vyvíjena v jazyce **Dart** pomocí multiplatformního frameworku **Flutter**, aby bylo možné ji spustit jak na systému Android, tak na iOS. Pro správu obsahu a uživatelů bude vytvořen backend, navržen databázový model a použit vhodný databázový systém (například **MySQL**). Jako volitelné rozšíření se počítá s možností rozpoznávání obalu kávy místo QR kódu, případně s implementací prvků rozšířené reality, kdy se video promítne přímo na obal produktu.  
 
 ## Cílová skupina
-Hlavním uživatelem tohoto produktu budou výrobci a distributoři kávy, kteří díky aplikaci získají možnost zprostředkovat zákazníkovi multimediální zážitek přímo při kontaktu s jejich produktem. Z pohledu koncových uživatelů, tedy zákazníků nakupujících kávu, jde o možnost obohacení nákupu o nové informace, například příběh o původu kávy, návod na přípravu nebo reklamní sdělení.  
+Primárními uživateli aplikace budou zákazníci nakupující kávu. Těm aplikace nabídne nejen přehrání videa, ale také rozšířené informace o produktu, jeho složení a původu. Aplikace je určena běžným spotřebitelům, proto musí být jednoduchá na ovládání a dostupná pro všechny věkové kategorie.  
 
-Cílovou platformou je primárně mobilní zařízení, tedy telefony a tablety, protože právě jejich kamera a dostupnost v běžném životě dává tomuto projektu smysl. Cílovou skupinou jsou běžní spotřebitelé, a proto aplikace musí být maximálně jednoduchá a přístupná lidem všech věkových kategorií. Na straně administrace je však cílem i možnost snadné správy obsahu pracovníky bez hlubších technických znalostí.  
+Druhou cílovou skupinou jsou výrobci a distributoři kávy. Pro ně aplikace představuje marketingový nástroj, díky kterému mohou prostřednictvím multimediálního obsahu přiblížit zákazníkům svůj produkt a jeho příběh. Samostatnou roli budou mít také pracovníci, kteří budou spravovat administrační rozhraní a vkládat potřebná data.  
 
 ## Přínos práce
-Přínosem této práce je dvojí rovina. Jednak se jedná o praktický produkt, který má potenciál najít reálné využití v marketingu a zákaznické komunikaci. Zároveň pro mě osobně bude projekt přínosem ve smyslu osvojení moderních technologií, jako je rozšířená reality, práce s databází a vývoj multiplatformních mobilních aplikací v Dart/Flutter. Práce tedy kombinuje studijní rovinu s praktickou aplikovatelností.  
+Přínos práce spočívá jednak v praktickém využití – aplikace poskytne výrobcům a distributorům nový způsob prezentace produktů a zákazníkům zajímavější zážitek z nákupu. Zároveň má projekt přínos studijní: během jeho realizace si osvojím moderní technologie, jako je multiplatformní vývoj ve Flutteru, návrh databází, tvorba backendu a správa uživatelských účtů. Součástí práce bude také zkušenost s implementací multimediálního obsahu a případným rozšířením o prvky rozšířené reality.  
 
 ## Ověřitelné body
-Konkrétní ověřitelné body, které bude třeba vyřešit, zahrnují úspěšné načtení QR kódu nebo obrázku obalu, správné propojení s videem a jeho přehrání v aplikaci, vytvoření administračního rozhraní pro správu obalů a videí a otestování jednoduchosti ovládání pro běžného uživatele.  
+- Úspěšné načtení QR kódu kamerou mobilního zařízení.  
+- Automatické spuštění příslušného videa propojeného s QR kódem.  
+- Zobrazení tlačítek **Složení** a **Více informací** po přehrání videa.  
+- Zobrazení složení směsi a podrobného textového popisu produktu.  
+- Funkční administrační rozhraní umožňující přiřazování videí, složení a popisů k QR kódům.  
+- Správa uživatelských účtů (přidávání, mazání, úprava práv).  
+- Návrh a implementace databázového modelu pro ukládání potřebných dat.  
+- Otestování aplikace z pohledu uživatele i administrátora.  
 
 ## Konkurenční řešení
-Existují i konkurenční produkty, které využívají podobný princip propojení obalů či předmětů s multimediálním obsahem. Příkladem je aplikace **Zappar**, která umožňuje využít rozšířenou realitu v marketingu a reklamě. Dalším příkladem je **HP Reveal (dříve Aurasma)**, která umožňovala přiřadit digitální obsah k obrázkům, i když již byla ukončena. Inspirací může být i **Blippar**, platforma využívající rozpoznávání obrazu pro propojení s interaktivními médii.  
+Existuje několik aplikací a platforem, které nabízejí podobné funkce propojení fyzických produktů s digitálním obsahem. Příkladem je **Zappar**, aplikace umožňující využít rozšířenou realitu v marketingu a reklamě. Dalším produktem byl **HP Reveal (dříve Aurasma)**, který umožňoval přiřazovat digitální obsah k obrázkům, i když již byl ukončen. Třetí inspirací je **Blippar**, platforma, která využívá rozpoznávání obrazu pro propojení s interaktivními médii.  
 
-Oproti těmto řešením bude má aplikace jednodušší, cílená na konkrétní oblast produktů – obaly kávy – a nabídne také vlastní administrační prostředí, díky němuž nebude nutné využívat externí služby.  
+Oproti těmto řešením bude má aplikace jednodušší, přizpůsobená konkrétnímu účelu – prezentaci směsí kávy – a doplněná vlastním administračním prostředím, díky němuž nebude nutné využívat externí služby.  
 
 ## Závěr
-Smyslem celé práce je tedy ukázat propojení klasického produktu s moderní digitální technologií a přiblížit uživateli kávu nejen jako běžnou komoditu, ale jako příběh a zážitek.  
+Smyslem práce je vytvořit mobilní aplikaci, která propojí obal kávy s multimediálním obsahem a zákazníkovi nabídne rozšířený zážitek. Zároveň bude vybudováno administrační rozhraní, které umožní snadnou správu obsahu a uživatelských účtů. Tím vznikne praktický produkt, který kombinuje marketingový přínos pro firmy a moderní technologie přístupné koncovým zákazníkům.  
 
