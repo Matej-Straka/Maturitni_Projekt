@@ -32,7 +32,7 @@ Přínos práce spočívá jednak v praktickém využití – aplikace poskytne 
 ## Konkurenční řešení
 Existuje několik aplikací a platforem, které nabízejí podobné funkce propojení fyzických produktů s digitálním obsahem. Příkladem je **Bring Your Wine to Life**, aplikace od výrobce vín Tussock Jumper, která po načtení obrázku na obalu vína spustí k vínu 3d video v rozšířené realitě. Dalším produktem byl   
 
-Oproti těmto řešením bude má aplikace jednodušší, přizpůsobená konkrétnímu účelu – prezentaci směsí kávy – a doplněná vlastním administračním prostředím, díky němuž nebude nutné využívat externí služby.  
+Oproti těmto řešením bude má aplikace jednodušší, přizpůsobená konkrétnímu účelu – prezentaci směsí kávy – a doplněná vlastním administračním prostředím.
 
 ## Závěr
 Smyslem práce je vytvořit mobilní aplikaci, která propojí obal kávy s multimediálním obsahem a zákazníkovi nabídne rozšířený zážitek. Zároveň bude vybudováno administrační rozhraní, které umožní snadnou správu obsahu a uživatelských účtů. Tím vznikne praktický produkt, který kombinuje marketingový přínos pro firmy a moderní technologie přístupné koncovým zákazníkům.  
