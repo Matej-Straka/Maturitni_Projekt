@@ -30,7 +30,7 @@ Přínos práce spočívá jednak v praktickém využití – aplikace poskytne 
 - Otestování aplikace z pohledu uživatele i administrátora.  
 
 ## Konkurenční řešení
-Existuje několik aplikací a platforem, které nabízejí podobné funkce propojení fyzických produktů s digitálním obsahem. Příkladem je **Zappar**, aplikace umožňující využít rozšířenou realitu v marketingu a reklamě. Dalším produktem byl **HP Reveal (dříve Aurasma)**, který umožňoval přiřazovat digitální obsah k obrázkům, i když již byl ukončen. Třetí inspirací je **Blippar**, platforma, která využívá rozpoznávání obrazu pro propojení s interaktivními médii.  
+Existuje několik aplikací a platforem, které nabízejí podobné funkce propojení fyzických produktů s digitálním obsahem. Příkladem je **Bring Your Wine to Life**, aplikace od výrobce vín Tussock Jumper, která po načtení obrázku na obalu vína spustí k vínu 3d video v rozšířené realitě. Dalším produktem byl   
 
 Oproti těmto řešením bude má aplikace jednodušší, přizpůsobená konkrétnímu účelu – prezentaci směsí kávy – a doplněná vlastním administračním prostředím, díky němuž nebude nutné využívat externí služby.  
 
