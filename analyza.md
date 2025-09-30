@@ -5,28 +5,28 @@
 Matěj Straka  
 
 ## Cíl práce
-Cílem maturitní práce je navrhnout, naprogramovat a otestovat mobilní aplikaci, která bude sloužit k prezentaci směsí kávy prostřednictvím QR kódů. Po načtení QR kódu pomocí kamery mobilního zařízení se přehraje příslušné video, které bude propojeno s konkrétní směsí kávy. Po skončení videa se v aplikaci zobrazí dvě tlačítka: **Složení**, které uživateli ukáže detailní složení směsi, a **Více informací**, kde se objeví rozšířený textový popis produktu.  
+Cílem maturitní práce je navrhnout, naprogramovat a otestovat mobilní aplikaci, která bude sloužit k prezentaci směsí kávy prostřednictvím QR kódů. Po načtení QR kódu, na obalu kávy, pomocí kamery mobilního zařízení se přehraje příslušné video, které bude propojeno s konkrétní směsí kávy. Po skončení videa se v aplikaci zobrazí dvě tlačítka: **Složení**, které uživateli ukáže detailní složení směsi, a **Více informací**, kde se objeví rozšířený textový popis produktu.  
 
 Součástí práce je také vytvoření administračního rozhraní pro správu obsahu. V administraci bude možné přiřazovat k jednotlivým QR kódům videa, texty se složením a popisy produktů. Dále zde bude správa uživatelských účtů s možností přidávání, mazání a úprav přístupových práv.  
 
-Aplikace bude vyvíjena v jazyce **Dart** pomocí multiplatformního frameworku **Flutter**, aby bylo možné ji spustit jak na systému Android, tak na iOS. Pro správu obsahu a uživatelů bude vytvořen backend, navržen databázový model a použit vhodný databázový systém (například **MySQL**). Jako volitelné rozšíření se počítá s možností rozpoznávání obalu kávy místo QR kódu, případně s implementací prvků rozšířené reality, kdy se video promítne přímo na obal produktu.  
+Aplikace bude vyvíjena pomocí **multiplatformního frameworku** (například Flutter nebo React Native), aby bylo možné ji spustit jak na systému Android, tak na iOS. Pro správu obsahu a uživatelů bude vytvořen backend, navržen databázový model a použit vhodný databázový systém. Jako volitelné rozšíření se počítá s možností rozpoznávání obalu kávy místo QR kódu, případně s implementací prvků rozšířené reality, kdy se video promítne přímo na obal produktu.  
 
 ## Cílová skupina
-Primárními uživateli aplikace budou zákazníci nakupující kávu. Těm aplikace nabídne nejen přehrání videa, ale také rozšířené informace o produktu, jeho složení a původu. Aplikace je určena běžným spotřebitelům, proto musí být jednoduchá na ovládání a dostupná pro všechny věkové kategorie.  
+Primárními uživateli aplikace budou zákazníci nakupující kávu. Těm aplikace nabídne nejen přehrání videa, ale také rozšířené informace o produktu, jeho složení a původu. Aplikace je určena běžným spotřebitelům, proto musí být jednoduchá na ovládání a dostupná pro všechny věkové kategorie a na všehny běžné mobilní platformy. 
 
-Druhou cílovou skupinou jsou výrobci a distributoři kávy. Pro ně aplikace představuje marketingový nástroj, díky kterému mohou prostřednictvím multimediálního obsahu přiblížit zákazníkům svůj produkt a jeho příběh. Samostatnou roli budou mít také pracovníci, kteří budou spravovat administrační rozhraní a vkládat potřebná data.  
+Druhou cílovou skupinou je výrobce a distributor kávy. Pro něj aplikace představuje marketingový nástroj, díky kterému může prostřednictvím multimediálního obsahu přiblížit zákazníkům svůj produkt a jeho příběh. 
 
 ## Přínos práce
-Přínos práce spočívá jednak v praktickém využití – aplikace poskytne výrobcům a distributorům nový způsob prezentace produktů a zákazníkům zajímavější zážitek z nákupu. Zároveň má projekt přínos studijní: během jeho realizace si osvojím moderní technologie, jako je multiplatformní vývoj ve Flutteru, návrh databází, tvorba backendu a správa uživatelských účtů. Součástí práce bude také zkušenost s implementací multimediálního obsahu a případným rozšířením o prvky rozšířené reality.  
+Přínos práce spočívá jednak v praktickém využití – aplikace poskytne výrobci kávy nový způsob prezentace produktů a zákazníkům zajímavější zážitek z nákupu. Zároveň má projekt přínos studijní: během jeho vytváření se naučím moderní technologie, jako multiplatformní vývoj mobilních aplikací, návrh databází, tvorba backendu a správa uživatelských účtů. Součástí práce bude také zkušenost s implementací multimediálního obsahu a případným rozšířením o prvky rozšířené reality.  
 
 ## Ověřitelné body
+- Návrh a implementace databázového modelu pro ukládání potřebných dat.  
 - Úspěšné načtení QR kódu kamerou mobilního zařízení.  
 - Automatické spuštění příslušného videa propojeného s QR kódem.  
 - Zobrazení tlačítek **Složení** a **Více informací** po přehrání videa.  
 - Zobrazení složení směsi a podrobného textového popisu produktu.  
 - Funkční administrační rozhraní umožňující přiřazování videí, složení a popisů k QR kódům.  
 - Správa uživatelských účtů (přidávání, mazání, úprava práv).  
-- Návrh a implementace databázového modelu pro ukládání potřebných dat.  
 - Otestování aplikace z pohledu uživatele i administrátora.  
 
 ## Konkurenční řešení
