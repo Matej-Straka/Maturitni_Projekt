@@ -20,17 +20,19 @@ Druhou cílovou skupinou je výrobce a distributor kávy. Pro něj aplikace pře
 Přínos práce spočívá jednak v praktickém využití – aplikace poskytne výrobci kávy nový způsob prezentace produktů a zákazníkům zajímavější zážitek z nákupu. Zároveň má projekt přínos studijní: během jeho vytváření se naučím moderní technologie, jako multiplatformní vývoj mobilních aplikací, návrh databází, tvorba backendu a správa uživatelských účtů. Součástí práce bude také zkušenost s implementací multimediálního obsahu a případným rozšířením o prvky rozšířené reality.  
 
 ## Ověřitelné body
-- Návrh a implementace databázového modelu pro ukládání potřebných dat.  
+- Výběr vhodného multiplatformního frameworku.
 - Úspěšné načtení QR kódu kamerou mobilního zařízení.  
+- Návrh a implementace databázového modelu pro ukládání potřebných dat.  
 - Automatické spuštění příslušného videa propojeného s QR kódem.  
 - Zobrazení tlačítek **Složení** a **Více informací** po přehrání videa.  
 - Zobrazení složení směsi a podrobného textového popisu produktu.  
 - Funkční administrační rozhraní umožňující přiřazování videí, složení a popisů k QR kódům.  
 - Správa uživatelských účtů (přidávání, mazání, úprava práv).  
 - Otestování aplikace z pohledu uživatele i administrátora.  
+- Vytvoření dokumentace.
 
 ## Konkurenční řešení
-Jsou některé aplikace, které nabízejí podobné funkce propojení fyzických produktů s digitálním obsahem. Příkladem je **Bring Your Wine to Life**, aplikace od výrobce vín Tussock Jumper, která po načtení obrázku na obalu vína spustí k vínu 3d video v rozšířené realitě. Další aplikací je **Smartify**, která umožňuje naskenovat umělecké dílo a získat tak informace o autorovi a díle. Dalším příkladem je 
+Jsou některé aplikace, které nabízejí podobné funkce propojení fyzických produktů s digitálním obsahem. Příkladem je **Bring Your Wine to Life**, aplikace od výrobce vín Tussock Jumper, která po načtení obrázku na obalu vína spustí k vínu 3d video v rozšířené realitě. Další aplikací je **Smartify**, která umožňuje naskenovat umělecké dílo a získat tak informace o autorovi a díle. Dalším příkladem je aplikace **Barcode Lookup**, která umožňuje skenovat čárové kódy a získat informace o produktech, včetně recenzí a cen. 
 
 Oproti těmto řešením bude má aplikace jednodušší, přizpůsobená konkrétnímu účelu – prezentaci směsí kávy – a doplněná vlastním administračním prostředím.
 
