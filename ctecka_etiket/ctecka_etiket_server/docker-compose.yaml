@@ -1,0 +1,44 @@
+services:
+  # Development services
+  postgres:
+    image: pgvector/pgvector:pg16
+    ports:
+      - "8090:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: ctecka_etiket
+      POSTGRES_PASSWORD: "PrgzvLkpYlNkqdeko635tfj11aseUs9S"
+    volumes:
+      - ctecka_etiket_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6.2.6
+    ports:
+      - "8091:6379"
+    command: redis-server --requirepass "jAFStISocZWJ92zmmJgllRVmM95LJZkW"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+  # Test services
+  postgres_test:
+    image: pgvector/pgvector:pg16
+    ports:
+      - "9090:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: ctecka_etiket_test
+      POSTGRES_PASSWORD: "ngLLY2uOyPI6w3OSol7H7h0mFcCLk1PM"
+    volumes:
+      - ctecka_etiket_test_data:/var/lib/postgresql/data
+
+  redis_test:
+    image: redis:6.2.6
+    ports:
+      - "9091:6379"
+    command: redis-server --requirepass "DuQleeYVOIZgnEguP_IJjPRR4cGRIB1M"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+volumes:
+  ctecka_etiket_data:
+  ctecka_etiket_test_data:
