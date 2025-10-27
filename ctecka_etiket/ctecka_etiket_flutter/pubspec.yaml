@@ -24,6 +24,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  mobile_scanner: ^5.0.0
   serverpod_flutter: 2.9.1
   ctecka_etiket_client:
     path: ../ctecka_etiket_client
