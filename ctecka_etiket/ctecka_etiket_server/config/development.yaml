@@ -30,7 +30,7 @@ webServer:
 # This is the database setup for your server.
 database:
   host: localhost
-  port: 8090
+  port: 5432
   name: ctecka_etiket
   user: postgres
   #requireSsl: true # defaults to false
@@ -44,7 +44,7 @@ redis:
   #user: # defaults to empty
   #requireSsl: true # defaults to false
 
-maxRequestSize: 524288 # The maximum size of requests allowed in bytes
+maxRequestSize: 524288000 # 500MB for large video uploads (was 512KB)
 
 sessionLogs:
   persistentEnabled: true

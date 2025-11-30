@@ -1,0 +1,10 @@
+class: MediaFile
+table: media_files
+fields:
+  url: String
+  fileName: String
+  fileType: String  # 'image' or 'video'
+  mimeType: String  # 'image/jpeg', 'video/mp4', etc.
+  fileSize: int
+  uploadedAt: DateTime, default=now
+  uploadedBy: String  # admin username

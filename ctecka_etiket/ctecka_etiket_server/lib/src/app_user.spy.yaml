@@ -1,0 +1,28 @@
+# Admin user for content management
+class: AppUser
+table: app_user
+
+fields:
+  ### Unique identifier
+  id: int?
+  ### Username for login
+  username: String
+  ### Hashed password
+  passwordHash: String
+  ### Email address
+  email: String
+  ### User role (admin, editor)
+  role: String
+  ### Whether the user is active
+  isActive: bool
+  ### Creation timestamp
+  createdAt: DateTime?
+  ### Last login timestamp
+  lastLogin: DateTime?
+
+indexes:
+  username_unique_idx:
+    fields: username
+    unique: true
+  email_idx:
+    fields: email

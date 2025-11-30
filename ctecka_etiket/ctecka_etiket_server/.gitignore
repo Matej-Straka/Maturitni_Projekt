@@ -13,3 +13,9 @@ config/passwords.yaml
 
 # Firebase service account key for Firebase auth
 config/firebase_service_account_key.json
+
+# Uploaded media files (videos, images) - ignore all files but keep folder structure
+web/uploads/*
+!web/uploads/.gitkeep
+web/static/uploads/*
+!web/static/uploads/.gitkeep

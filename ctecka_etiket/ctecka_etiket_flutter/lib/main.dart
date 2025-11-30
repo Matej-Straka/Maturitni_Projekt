@@ -1,16 +1,28 @@
-
 import 'package:ctecka_etiket_client/ctecka_etiket_client.dart';
 import 'package:flutter/material.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
+import 'dart:io';
 
 late final Client client;
-late String serverUrl;
+const serverUrl = String.fromEnvironment('SERVER_URL', defaultValue: 'http://192.168.0.112:8080/');
+const staticServerUrl = String.fromEnvironment('STATIC_SERVER_URL', defaultValue: 'http://192.168.0.112:8090');
+
+// Helper function to get full URL for media files
+String getMediaUrl(String url) {
+  if (url.startsWith('http')) {
+    return url;
+  }
+  // Files are served from static server on port 8090
+  // Remove /uploads/ prefix since static server serves directly from web/uploads folder
+  final cleanUrl = url.startsWith('/uploads/') ? url.substring(8) : url;
+  return '$staticServerUrl/$cleanUrl';
+}
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  const serverUrlFromEnv = String.fromEnvironment('SERVER_URL');
-  serverUrl = serverUrlFromEnv.isEmpty ? 'http://localhost:8080/' : serverUrlFromEnv;
   client = Client(serverUrl)..connectivityMonitor = FlutterConnectivityMonitor();
   runApp(const MyApp());
 }
@@ -21,18 +33,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Čtečka etiket',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFFF7F5F0),
-        primaryColor: const Color(0xFF3A8E2F),
+        scaffoldBackgroundColor: const Color(0xFFF5F5F5),
+        primaryColor: const Color(0xFF4CAF50),
         fontFamily: 'Roboto',
       ),
-      initialRoute: '/onboarding',
-      routes: {
-        '/onboarding': (c) => const OnboardingFlow(),
-        '/scanner': (c) => const QRScannerPage(),
-        '/video': (c) => const VideoPage(),
-        '/info': (c) => const InfoMenuPage(),
-      },
+      home: const OnboardingFlow(),
     );
   }
 }
@@ -54,78 +61,115 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     super.dispose();
   }
 
-  Widget _buildPage(String title, String body, {String imageUrl = ''}) {
-    return Column(
-      children: [
-        Expanded(
-          child: Center(
-            child: imageUrl.isEmpty
-                ? Icon(Icons.image, size: 120, color: Colors.grey[400])
-                : ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(imageUrl, fit: BoxFit.cover, width: 260, height: 260),
-                  ),
+  Widget _buildPage(String step, String title, String body) {
+    return Container(
+      color: const Color(0xFFF5F1EB),
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        children: [
+          const Spacer(flex: 2),
+          Container(
+            width: 200,
+            height: 200,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(Icons.image_outlined, size: 80, color: Colors.grey[400]),
           ),
-        ),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFAF6F0),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-          ),
-          child: Column(
-            children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              const SizedBox(height: 8),
-              Text(body, textAlign: TextAlign.center, style: const TextStyle(color: Colors.black54)),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(3, (i) => Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: i == _page ? const Color(0xFF3A8E2F) : Colors.green[100],
-                    shape: BoxShape.circle,
+          const Spacer(flex: 1),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFAF8F5),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  step,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w500,
                   ),
-                )),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                height: 46,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_page < 2) {
-                      _pc.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.ease);
-                    } else {
-                      Navigator.of(context).pushReplacementNamed('/scanner');
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF66BB6A)),
-                  child: Text(_page < 2 ? 'POKRAČOVAT' : 'ZAČÍT', style: const TextStyle(color: Colors.black)),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  body,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(3, (i) => Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: i == _page ? const Color(0xFF4CAF50) : Colors.grey[300],
+                shape: BoxShape.circle,
+              ),
+            )),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              onPressed: () {
+                if (_page < 2) {
+                  _pc.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                } else {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const QRScannerPage()));
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF8BC34A),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 2,
+              ),
+              child: Text(_page < 2 ? 'POKRAČOVAT' : 'ZAČÍT', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+            ),
+          ),
+          const Spacer(flex: 1),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView(
-        controller: _pc,
-        onPageChanged: (i) => setState(() => _page = i),
-        children: [
-          _buildPage('VÍTĚJTE U PŘEDSTAVENÍ KÁV', 'Tato aplikace slouží jako interaktivní představení našich káv pomocí QR kódů na jejich obalu.', imageUrl: 'https://picsum.photos/seed/coffee1/400/400'),
-          _buildPage('1. KROK', 'Najeďte QR kód na obalu jedné z našich káv.', imageUrl: 'https://picsum.photos/seed/coffee2/400/400'),
-          _buildPage('2. KROK', 'Přehráje se video a poté vyskočí menu, kde najdete složení a více informací.', imageUrl: 'https://picsum.photos/seed/coffee3/400/400'),
-        ],
+      body: SafeArea(
+        child: PageView(
+          controller: _pc,
+          onPageChanged: (i) => setState(() => _page = i),
+          children: [
+            _buildPage('KROK 1', 'Úvodní IT Představení nás', 'Toto je úvodní stránka představující naší aplikaci pro skenování kávy.'),
+            _buildPage('KROK 2', 'Druhá', 'Toto je druhá stránka s dalšími informacemi o aplikaci.'),
+            _buildPage('KROK 3', 'Třetí', 'Poslední stránka před začátkem používání aplikace.'),
+          ],
+        ),
       ),
     );
   }
@@ -138,225 +182,660 @@ class QRScannerPage extends StatefulWidget {
   State<QRScannerPage> createState() => _QRScannerPageState();
 }
 
-class _QRScannerPageState extends State<QRScannerPage> {
-  final MobileScannerController _cameraController = MobileScannerController();
-  bool _processing = false;
+class _QRScannerPageState extends State<QRScannerPage> with WidgetsBindingObserver {
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  QRViewController? controller;
+  bool _isProcessing = false;
+  bool _cameraActive = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    if (Platform.isAndroid) {
+      controller?.pauseCamera();
+    }
+    controller?.resumeCamera();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (controller == null) return;
+    
+    if (state == AppLifecycleState.inactive) {
+      controller?.pauseCamera();
+      _cameraActive = false;
+    } else if (state == AppLifecycleState.resumed) {
+      if (!_cameraActive) {
+        controller?.resumeCamera();
+        _cameraActive = true;
+      }
+    }
+  }
 
   @override
   void dispose() {
-    _cameraController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    controller?.dispose();
     super.dispose();
   }
 
-  Future<void> _onScanned(String code) async {
-    if (_processing) return;
-    setState(() => _processing = true);
-    await _cameraController.stop();
-  // code scanned (handled in the modal actions)
-
-    // small dialog that mimics design: play video or open info
-    if (!mounted) return;
-    await showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(12))),
-      builder: (c) => Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text('QR nalezen', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 8),
-          Text(code, textAlign: TextAlign.center),
-          const SizedBox(height: 12),
-          Row(children: [
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pushNamed('/video');
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF66BB6A)),
-                child: const Text('PUSŤ VIDEO', style: TextStyle(color: Colors.black)),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pushNamed('/info');
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF7043)),
-                child: const Text('VÍCE INFO', style: TextStyle(color: Colors.white)),
-              ),
-            ),
-          ]),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _cameraController.start();
-              setState(() => _processing = false);
-            },
-            child: const Text('SCAN AGAIN'),
-          )
-        ]),
-      ),
-    );
-    setState(() => _processing = false);
-    _cameraController.start();
+  void _onQRViewCreated(QRViewController controller) {
+    this.controller = controller;
+    controller.scannedDataStream.listen((scanData) {
+      if (_isProcessing) return;
+      if (scanData.code == null) return;
+      
+      setState(() => _isProcessing = true);
+      controller.pauseCamera();
+      _cameraActive = false;
+      
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => LoadingCoffeePage(qrCode: scanData.code!)),
+      ).then((_) {
+        if (mounted) {
+          setState(() => _isProcessing = false);
+          // On iOS, we need to explicitly resume camera after navigation
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (mounted) {
+              controller.resumeCamera();
+              _cameraActive = true;
+            }
+          });
+        }
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(children: [
-        MobileScanner(
-          controller: _cameraController,
-          fit: BoxFit.cover,
-          onDetect: (capture) {
-            final barcode = capture.barcodes.isNotEmpty ? capture.barcodes.first : null;
-            final raw = barcode?.rawValue ?? barcode?.displayValue;
-            if (raw != null) _onScanned(raw);
-          },
-        ),
-        Align(
-          alignment: Alignment.topCenter,
-          child: SafeArea(
-            child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-              IconButton(icon: const Icon(Icons.flash_on, color: Colors.white), onPressed: () => _cameraController.toggleTorch()),
-              IconButton(icon: const Icon(Icons.flip_camera_android, color: Colors.white), onPressed: () => _cameraController.switchCamera()),
-              const SizedBox(width: 6),
-            ]),
+      backgroundColor: const Color(0xFFF5F1EB),
+      body: Stack(
+        children: [
+          QRView(
+            key: qrKey,
+            onQRViewCreated: _onQRViewCreated,
+            overlay: QrScannerOverlayShape(
+              borderColor: const Color(0xFF8BC34A),
+              borderRadius: 20,
+              borderLength: 40,
+              borderWidth: 8,
+              cutOutSize: MediaQuery.of(context).size.width * 0.7,
+            ),
           ),
-        ),
-        // subtle bottom panel like design
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            color: const Color(0xFFFAF6F0),
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-            child: Row(children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => Navigator.of(context).pushNamed('/onboarding'),
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF66BB6A)),
-                  child: const Text('NÁVOD', style: TextStyle(color: Colors.black)),
+          // Info text nahoře
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              bottom: false,
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.black.withOpacity(0.7), Colors.transparent],
+                  ),
+                ),
+                child: const Text(
+                  'Namiřte fotoaparát na QR kód',
+                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+                  textAlign: TextAlign.center,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => Navigator.of(context).pushNamed('/info'),
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF7043)),
-                  child: const Text('MANUÁL', style: TextStyle(color: Colors.white)),
-                ),
-              ),
-            ]),
+            ),
           ),
-        ),
-        if (_processing) const Center(child: CircularProgressIndicator(color: Colors.white)),
-      ]),
-    );
-  }
-}
-
-/* ---------------------- Video page ---------------------- */
-class VideoPage extends StatelessWidget {
-  const VideoPage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Video'), backgroundColor: const Color(0xFFF7F5F0), foregroundColor: Colors.black, elevation: 0),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(children: [
-          Expanded(
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
             child: Container(
-              decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(12)),
-              child: const Center(child: Icon(Icons.play_circle_fill, size: 72, color: Colors.black54)),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 20)],
+              ),
+              child: SafeArea(
+                top: false,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Zobraz dialog s návodem
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Návod k použití'),
+                              content: const Text(
+                                'Namiřte fotoaparát na QR kód kávy.\n\n'
+                                'Po úspěšném načtení QR kódu se automaticky přehraje video s informacemi o kávě.\n\n'
+                                'Pokud chcete zadat QR kód ručně, stiskněte tlačítko "Manuální".',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  child: const Text('Rozumím'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF8BC34A),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 2,
+                        ),
+                        child: const Text('VÍCE INFORMACÍ', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          // Zobraz dialog pro manuální zadání QR kódu
+                          final controller = TextEditingController();
+                          final result = await showDialog<String>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Zadat QR kód'),
+                              content: TextField(
+                                controller: controller,
+                                decoration: const InputDecoration(
+                                  labelText: 'QR kód',
+                                  hintText: 'Zadejte QR kód kávy',
+                                ),
+                                autofocus: true,
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  child: const Text('Zrušit'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx, controller.text),
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                          
+                          if (result != null && result.isNotEmpty) {
+                            setState(() => _isProcessing = true);
+                            try {
+                              final coffee = await client.coffee.getCoffeeByQR(result);
+                              if (coffee == null) {
+                                if (!mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('QR kód nenalezen'), backgroundColor: Colors.red),
+                                );
+                              } else {
+                                if (!mounted) return;
+                                Navigator.of(context).push(MaterialPageRoute(builder: (_) => VideoPage(coffee: coffee)));
+                              }
+                            } catch (e) {
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Chyba: $e'), backgroundColor: Colors.red),
+                              );
+                            } finally {
+                              if (mounted) {
+                                setState(() => _isProcessing = false);
+                              }
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF5722),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 2,
+                        ),
+                        child: const Text('SLOŽENÍ', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 18),
-          const Text('Prostě se přehrává video...', style: TextStyle(color: Colors.black54)),
-          const SizedBox(height: 18),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => Navigator.of(context).pushNamed('/info'),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF66BB6A)),
-              child: const Text('VÍCE INFORMACÍ', style: TextStyle(color: Colors.black)),
-            ),
-          ),
-        ]),
+        ],
       ),
     );
   }
 }
 
-/* ---------------------- Info menu and pages ---------------------- */
+/* ---------------------- Loading Coffee Page ---------------------- */
+class LoadingCoffeePage extends StatefulWidget {
+  final String qrCode;
+  const LoadingCoffeePage({super.key, required this.qrCode});
+
+  @override
+  State<LoadingCoffeePage> createState() => _LoadingCoffeePageState();
+}
+
+class _LoadingCoffeePageState extends State<LoadingCoffeePage> {
+  @override
+  void initState() {
+    super.initState();
+    _loadCoffee();
+  }
+
+  Future<void> _loadCoffee() async {
+    try {
+      final coffee = await client.coffee.getCoffeeByQR(widget.qrCode);
+      if (!mounted) return;
+      
+      if (coffee == null) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('QR kód nenalezen'), backgroundColor: Colors.red),
+        );
+        return;
+      }
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => VideoPage(coffee: coffee)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Chyba: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F1EB),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: Color(0xFF8BC34A)),
+            SizedBox(height: 24),
+            Text(
+              'Načítání...',
+              style: TextStyle(color: Colors.black87, fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/* ---------------------- Video Page ---------------------- */
+class VideoPage extends StatefulWidget {
+  final Coffee coffee;
+  const VideoPage({super.key, required this.coffee});
+  @override
+  State<VideoPage> createState() => _VideoPageState();
+}
+
+class _VideoPageState extends State<VideoPage> {
+  late VideoPlayerController _videoController;
+  ChewieController? _chewieController;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _initVideo();
+  }
+
+  Future<void> _initVideo() async {
+    try {
+      final videoUrl = getMediaUrl(widget.coffee.videoUrl);
+      print('🎥 DEBUG: Loading video from: $videoUrl');
+      print('🎥 DEBUG: Original URL from DB: ${widget.coffee.videoUrl}');
+      
+      _videoController = VideoPlayerController.networkUrl(
+        Uri.parse(videoUrl),
+        videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+      );
+
+      await _videoController.initialize();
+      if (!mounted) return;
+
+      setState(() {
+        _chewieController = ChewieController(
+          videoPlayerController: _videoController,
+          autoPlay: true,
+          looping: false,
+          aspectRatio: _videoController.value.aspectRatio,
+          allowFullScreen: false,
+          showControls: true,
+          materialProgressColors: ChewieProgressColors(
+            playedColor: const Color(0xFF8BC34A),
+            handleColor: const Color(0xFF8BC34A),
+            backgroundColor: Colors.grey.shade300,
+            bufferedColor: Colors.grey.shade400,
+          ),
+        );
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void deactivate() {
+    // Pause video when navigating away
+    _videoController.pause();
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    _videoController.pause();
+    _chewieController?.dispose();
+    _videoController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator(color: Colors.white))
+          : _error != null
+              ? Center(child: Text('Chyba: $_error', style: const TextStyle(color: Colors.white)))
+              : Column(
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: _chewieController != null
+                            ? Chewie(controller: _chewieController!)
+                            : const SizedBox(),
+                      ),
+                    ),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                      ),
+                      child: SafeArea(
+                        top: false,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.coffee.name,
+                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              widget.coffee.description,
+                              style: const TextStyle(fontSize: 14, color: Colors.black87),
+                            ),
+                            const SizedBox(height: 20),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (_) => InfoMenuPage(coffee: widget.coffee),
+                                  ));
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF8BC34A),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  elevation: 2,
+                                ),
+                                child: const Text('VÍCE INFORMACÍ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+    );
+  }
+}
+
+/* ---------------------- Info Menu ---------------------- */
 class InfoMenuPage extends StatelessWidget {
-  const InfoMenuPage({super.key});
+  final Coffee coffee;
+  const InfoMenuPage({super.key, required this.coffee});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Káva XY'), backgroundColor: const Color(0xFFF7F5F0), foregroundColor: Colors.black, elevation: 0),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
-            child: Image.network('https://picsum.photos/seed/package/300/300', height: 220),
-          ),
-          const SizedBox(height: 18),
-          const Text('Krátké info o kávě...', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const InfoDetailPage(title: 'Více informací', body: 'Dlouhé info...'))),
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFBEE7B6), foregroundColor: Colors.black),
-            child: const Text('VÍCE INFORMACÍ'),
-          ),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const InfoDetailPage(title: 'Složení', body: 'Složení kávy...'))),
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFBEE7B6), foregroundColor: Colors.black),
-            child: const Text('SLOŽENÍ'),
-          ),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF7043)),
-            child: const Text('ZAVŘÍT', style: TextStyle(color: Colors.white)),
-          ),
-        ]),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 200,
+                      height: 280,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: const Offset(0, 4))],
+                      ),
+                      child: coffee.imageUrl.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(getMediaUrl(coffee.imageUrl), fit: BoxFit.cover),
+                            )
+                          : Icon(Icons.coffee, size: 80, color: Colors.grey[400]),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      coffee.name,
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      coffee.description,
+                      style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => InfoDetailPage(
+                            coffee: coffee,
+                            title: 'Více informací',
+                            content: coffee.moreInfo,
+                          ),
+                        ));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF8BC34A),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 2,
+                      ),
+                      child: const Text('VÍCE INFORMACÍ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => InfoDetailPage(
+                            coffee: coffee,
+                            title: 'Složení',
+                            content: coffee.composition,
+                          ),
+                        ));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFF5722),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 2,
+                      ),
+                      child: const Text('SLOŽENÍ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
+/* ---------------------- Info Detail ---------------------- */
 class InfoDetailPage extends StatelessWidget {
+  final Coffee coffee;
   final String title;
-  final String body;
-  const InfoDetailPage({super.key, required this.title, required this.body});
+  final String content;
+
+  const InfoDetailPage({
+    super.key,
+    required this.coffee,
+    required this.title,
+    required this.content,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title), backgroundColor: const Color(0xFFF7F5F0), foregroundColor: Colors.black, elevation: 0),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(children: [
-          Container(height: 260, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)), child: Center(child: Image.network('https://picsum.photos/seed/package2/260/260'))),
-          const SizedBox(height: 18),
-          Text(body, textAlign: TextAlign.center),
-          const Spacer(),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF7043)),
-              child: const Text('ZPĚT', style: TextStyle(color: Colors.white)),
+      backgroundColor: const Color(0xFFFAF8F5),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      color: Colors.white,
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 160,
+                            height: 220,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: const Offset(0, 4))],
+                            ),
+                            child: coffee.imageUrl.isNotEmpty
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.network(getMediaUrl(coffee.imageUrl), fit: BoxFit.cover),
+                                  )
+                                : Icon(Icons.coffee, size: 60, color: Colors.grey[400]),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            content,
+                            style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.6),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ]),
+            Container(
+              padding: const EdgeInsets.all(24),
+              color: Colors.white,
+              child: SafeArea(
+                top: false,
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFF5722),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 3,
+                    ),
+                    child: const Text('ZPĚT', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

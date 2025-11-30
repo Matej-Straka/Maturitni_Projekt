@@ -1,0 +1,27 @@
+# Coffee product model
+class: Coffee
+table: coffee
+
+fields:
+  ### Unique identifier
+  id: int?
+  ### Name of the coffee blend
+  name: String
+  ### Short description shown in the info menu
+  description: String
+  ### Detailed composition/ingredients
+  composition: String
+  ### Extended information text
+  moreInfo: String
+  ### URL to the video (can be local path or remote URL)
+  videoUrl: String
+  ### URL to the product image
+  imageUrl: String
+  ### Creation timestamp
+  createdAt: DateTime?
+  ### Last update timestamp
+  updatedAt: DateTime?
+
+indexes:
+  coffee_name_idx:
+    fields: name

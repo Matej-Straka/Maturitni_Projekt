@@ -1,2 +1,28 @@
+admin:
+  - createCoffee:
+  - updateCoffee:
+  - deleteCoffee:
+  - assignQRCode:
+  - getAllQRMappings:
+  - deleteQRMapping:
+  - createUser:
+  - getAllUsers:
+  - login:
+  - uploadFileBase64:
+  - getAllMedia:
+  - deleteMedia:
+coffee:
+  - getCoffeeByQR:
+  - getAllCoffees:
+  - getCoffeeDetail:
+  - createCoffee:
+  - updateCoffee:
+  - deleteCoffee:
+  - getAllQRCodes:
+  - createQRCode:
+  - deleteQRCode:
+upload:
+  - uploadFile:
+  - deleteFile:
 greeting:
   - hello:

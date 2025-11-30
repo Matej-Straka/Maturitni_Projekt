@@ -1,0 +1,20 @@
+# QR Code mapping to Coffee
+class: QRCodeMapping
+table: qr_code_mapping
+
+fields:
+  ### Unique identifier
+  id: int?
+  ### The actual QR code string/value
+  qrCode: String
+  ### Foreign key to Coffee
+  coffeeId: int
+  ### Creation timestamp
+  createdAt: DateTime?
+  ### Whether this QR code is active
+  isActive: bool
+
+indexes:
+  qr_code_unique_idx:
+    fields: qrCode
+    unique: true
