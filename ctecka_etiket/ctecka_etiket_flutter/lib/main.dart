@@ -5,10 +5,11 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
 
-late final Client client;
-const serverUrl = String.fromEnvironment('SERVER_URL', defaultValue: 'http://192.168.0.112:8080/');
-const staticServerUrl = String.fromEnvironment('STATIC_SERVER_URL', defaultValue: 'http://192.168.0.112:8090');
+late Client client;
+String serverUrl = 'http://192.168.0.112:8080/';
+String staticServerUrl = 'http://192.168.0.112:8090';
 
 // Helper function to get full URL for media files
 String getMediaUrl(String url) {
@@ -21,8 +22,25 @@ String getMediaUrl(String url) {
   return '$staticServerUrl/$cleanUrl';
 }
 
-void main() {
+// Load server settings from SharedPreferences
+Future<void> loadServerSettings() async {
+  final prefs = await SharedPreferences.getInstance();
+  serverUrl = prefs.getString('serverUrl') ?? 'http://192.168.0.112:8080/';
+  staticServerUrl = prefs.getString('staticServerUrl') ?? 'http://192.168.0.112:8090';
+}
+
+// Save server settings to SharedPreferences
+Future<void> saveServerSettings(String apiUrl, String staticUrl) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('serverUrl', apiUrl);
+  await prefs.setString('staticServerUrl', staticUrl);
+  serverUrl = apiUrl;
+  staticServerUrl = staticUrl;
+}
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await loadServerSettings();
   client = Client(serverUrl)..connectivityMonitor = FlutterConnectivityMonitor();
   runApp(const MyApp());
 }
@@ -285,10 +303,24 @@ class _QRScannerPageState extends State<QRScannerPage> with WidgetsBindingObserv
                     colors: [Colors.black.withOpacity(0.7), Colors.transparent],
                   ),
                 ),
-                child: const Text(
-                  'Namiřte fotoaparát na QR kód',
-                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
-                  textAlign: TextAlign.center,
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Namiřte fotoaparát na QR kód',
+                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.settings, color: Colors.white),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const SettingsPage()),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -841,5 +873,246 @@ class InfoDetailPage extends StatelessWidget {
   }
 }
 
+/* ---------------------- Settings Page ---------------------- */
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  late TextEditingController _apiUrlController;
+  late TextEditingController _staticUrlController;
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _apiUrlController = TextEditingController(text: serverUrl);
+    _staticUrlController = TextEditingController(text: staticServerUrl);
+  }
+
+  @override
+  void dispose() {
+    _apiUrlController.dispose();
+    _staticUrlController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveSettings() async {
+    setState(() => _isSaving = true);
+    
+    try {
+      final apiUrl = _apiUrlController.text.trim();
+      final staticUrl = _staticUrlController.text.trim();
+      
+      // Validate URLs
+      if (apiUrl.isEmpty || staticUrl.isEmpty) {
+        throw Exception('URL nesmí být prázdná');
+      }
+      
+      if (!apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
+        throw Exception('API URL musí začínat http:// nebo https://');
+      }
+      
+      if (!staticUrl.startsWith('http://') && !staticUrl.startsWith('https://')) {
+        throw Exception('Static URL musí začínat http:// nebo https://');
+      }
+      
+      // Save settings
+      await saveServerSettings(apiUrl, staticUrl);
+      
+      // Reinitialize client
+      client = Client(serverUrl)..connectivityMonitor = FlutterConnectivityMonitor();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Nastavení uloženo! Restartujte aplikaci pro aplikování změn.'),
+            backgroundColor: Color(0xFF8BC34A),
+            duration: Duration(seconds: 3),
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Chyba: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
+
+  Future<void> _resetToDefaults() async {
+    setState(() {
+      _apiUrlController.text = 'http://192.168.0.112:8080/';
+      _staticUrlController.text = 'http://192.168.0.112:8090';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F1EB),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Nastavení serveru',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue.shade700),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        'Pro debugování můžete změnit adresu serveru.',
+                        style: TextStyle(fontSize: 13, height: 1.4),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'API Server URL',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _apiUrlController,
+                decoration: InputDecoration(
+                  hintText: 'http://192.168.0.112:8080/',
+                  prefixIcon: const Icon(Icons.dns),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                keyboardType: TextInputType.url,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Port pro REST API endpointy',
+                style: TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Static Server URL',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _staticUrlController,
+                decoration: InputDecoration(
+                  hintText: 'http://192.168.0.112:8090',
+                  prefixIcon: const Icon(Icons.video_library),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                keyboardType: TextInputType.url,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Port pro videa a obrázky',
+                style: TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isSaving ? null : _saveSettings,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8BC34A),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 2,
+                  ),
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text('ULOŽIT', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton(
+                  onPressed: _resetToDefaults,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF8BC34A),
+                    side: const BorderSide(color: Color(0xFF8BC34A), width: 2),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('OBNOVIT VÝCHOZÍ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Aktuální nastavení:',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'API: $serverUrl',
+                      style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Static: $staticServerUrl',
+                      style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 
