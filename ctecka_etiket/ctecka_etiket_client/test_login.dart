@@ -12,5 +12,5 @@ void main() async {
     print('Error: $e');
   }
   
-  await client.close();
+  client.close();
 }

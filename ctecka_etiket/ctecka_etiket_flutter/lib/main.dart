@@ -6,6 +6,7 @@ import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'theme/app_theme.dart';
 
 late Client client;
 String serverUrl = 'http://192.168.0.112:8080/';
@@ -26,7 +27,8 @@ String getMediaUrl(String url) {
 Future<void> loadServerSettings() async {
   final prefs = await SharedPreferences.getInstance();
   serverUrl = prefs.getString('serverUrl') ?? 'http://192.168.0.112:8080/';
-  staticServerUrl = prefs.getString('staticServerUrl') ?? 'http://192.168.0.112:8090';
+  staticServerUrl =
+      prefs.getString('staticServerUrl') ?? 'http://192.168.0.112:8090';
 }
 
 // Save server settings to SharedPreferences
@@ -41,7 +43,8 @@ Future<void> saveServerSettings(String apiUrl, String staticUrl) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await loadServerSettings();
-  client = Client(serverUrl)..connectivityMonitor = FlutterConnectivityMonitor();
+  client = Client(serverUrl)
+    ..connectivityMonitor = FlutterConnectivityMonitor();
   runApp(const MyApp());
 }
 
@@ -52,11 +55,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Čtečka etiket',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFFF5F5F5),
-        primaryColor: const Color(0xFF4CAF50),
-        fontFamily: 'Roboto',
-      ),
+      theme: AppTheme.light(),
       home: const OnboardingFlow(),
     );
   }
@@ -79,7 +78,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     super.dispose();
   }
 
-  Widget _buildPage(String step, String title, String body) {
+  Widget _buildPage(String title, String body) {
     return Container(
       color: const Color(0xFFF5F1EB),
       padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -93,32 +92,23 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               color: Colors.grey[200],
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(Icons.image_outlined, size: 80, color: Colors.grey[400]),
+            child:
+                Icon(Icons.image_outlined, size: 80, color: Colors.grey[400]),
           ),
           const Spacer(flex: 1),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFFFAF8F5),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
               children: [
                 Text(
-                  step,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 36,
+                    fontWeight: FontWeight.w600,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -126,8 +116,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 Text(
                   body,
                   style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black87,
+                    fontFamily: 'Faustina',
+                    fontSize: 16,
+                    color: Color(0xFF797979),
                     height: 1.5,
                   ),
                   textAlign: TextAlign.center,
@@ -138,35 +129,49 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(3, (i) => Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: i == _page ? const Color(0xFF4CAF50) : Colors.grey[300],
-                shape: BoxShape.circle,
-              ),
-            )),
+            children: List.generate(
+                3,
+                (i) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: i == _page
+                            ? const Color(0xFF4CAF50)
+                            : Colors.grey[300],
+                        shape: BoxShape.circle,
+                      ),
+                    )),
           ),
-          const SizedBox(height: 24),
+
+          const Spacer(flex: 1),
           SizedBox(
             width: double.infinity,
-            height: 50,
+            height: 60,
             child: ElevatedButton(
               onPressed: () {
                 if (_page < 2) {
-                  _pc.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                  _pc.nextPage( 
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut);
                 } else {
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const QRScannerPage()));
+                  Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => const QRScannerPage()));
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8BC34A),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 2,
+                backgroundColor: const Color(0xFF97C451),
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                elevation: 1,
               ),
-              child: Text(_page < 2 ? 'POKRAČOVAT' : 'ZAČÍT', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+              child: Text(_page < 2 ? 'POKRAČOVAT' : 'POJĎME NA TO',
+                  style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Snug Variable',
+                      letterSpacing: 0.5)),
             ),
           ),
           const Spacer(flex: 1),
@@ -183,9 +188,12 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           controller: _pc,
           onPageChanged: (i) => setState(() => _page = i),
           children: [
-            _buildPage('KROK 1', 'Úvodní IT Představení nás', 'Toto je úvodní stránka představující naší aplikaci pro skenování kávy.'),
-            _buildPage('KROK 2', 'Druhá', 'Toto je druhá stránka s dalšími informacemi o aplikaci.'),
-            _buildPage('KROK 3', 'Třetí', 'Poslední stránka před začátkem používání aplikace.'),
+            _buildPage('VÍTEJTE U PŘEDSTAVENÍ KÁV',
+                'Tato aplikace slouží jako interaktivní představení naších káv pomocí QR kódů na jejich obalu'),
+            _buildPage('1. KROK',
+                'Načtete qr kod na obalu jedné z naších káv'),
+            _buildPage('2. KROK',
+                'Přehraje se video a poté vyskočí menu kde můžete najít složení a více informací o kávě'),
           ],
         ),
       ),
@@ -200,7 +208,8 @@ class QRScannerPage extends StatefulWidget {
   State<QRScannerPage> createState() => _QRScannerPageState();
 }
 
-class _QRScannerPageState extends State<QRScannerPage> with WidgetsBindingObserver {
+class _QRScannerPageState extends State<QRScannerPage>
+    with WidgetsBindingObserver {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;
   bool _isProcessing = false;
@@ -224,7 +233,7 @@ class _QRScannerPageState extends State<QRScannerPage> with WidgetsBindingObserv
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (controller == null) return;
-    
+
     if (state == AppLifecycleState.inactive) {
       controller?.pauseCamera();
       _cameraActive = false;
@@ -248,14 +257,17 @@ class _QRScannerPageState extends State<QRScannerPage> with WidgetsBindingObserv
     controller.scannedDataStream.listen((scanData) {
       if (_isProcessing) return;
       if (scanData.code == null) return;
-      
+
       setState(() => _isProcessing = true);
       controller.pauseCamera();
       _cameraActive = false;
-      
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => LoadingCoffeePage(qrCode: scanData.code!)),
-      ).then((_) {
+
+      Navigator.of(context)
+          .push(
+        MaterialPageRoute(
+            builder: (_) => LoadingCoffeePage(qrCode: scanData.code!)),
+      )
+          .then((_) {
         if (mounted) {
           setState(() => _isProcessing = false);
           // On iOS, we need to explicitly resume camera after navigation
@@ -308,7 +320,10 @@ class _QRScannerPageState extends State<QRScannerPage> with WidgetsBindingObserv
                     const Expanded(
                       child: Text(
                         'Namiřte fotoaparát na QR kód',
-                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -316,7 +331,8 @@ class _QRScannerPageState extends State<QRScannerPage> with WidgetsBindingObserv
                       icon: const Icon(Icons.settings, color: Colors.white),
                       onPressed: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const SettingsPage()),
+                          MaterialPageRoute(
+                              builder: (_) => const SettingsPage()),
                         );
                       },
                     ),
@@ -333,7 +349,8 @@ class _QRScannerPageState extends State<QRScannerPage> with WidgetsBindingObserv
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(32)),
                 boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 20)],
               ),
               child: SafeArea(
@@ -366,10 +383,15 @@ class _QRScannerPageState extends State<QRScannerPage> with WidgetsBindingObserv
                           backgroundColor: const Color(0xFF8BC34A),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 18),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                           elevation: 2,
                         ),
-                        child: const Text('VÍCE INFORMACÍ', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
+                        child: const Text('VÍCE INFORMACÍ',
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.3)),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -396,30 +418,37 @@ class _QRScannerPageState extends State<QRScannerPage> with WidgetsBindingObserv
                                   child: const Text('Zrušit'),
                                 ),
                                 TextButton(
-                                  onPressed: () => Navigator.pop(ctx, controller.text),
+                                  onPressed: () =>
+                                      Navigator.pop(ctx, controller.text),
                                   child: const Text('OK'),
                                 ),
                               ],
                             ),
                           );
-                          
+
                           if (result != null && result.isNotEmpty) {
                             setState(() => _isProcessing = true);
                             try {
-                              final coffee = await client.coffee.getCoffeeByQR(result);
+                              final coffee =
+                                  await client.coffee.getCoffeeByQR(result);
                               if (coffee == null) {
                                 if (!mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('QR kód nenalezen'), backgroundColor: Colors.red),
+                                  const SnackBar(
+                                      content: Text('QR kód nenalezen'),
+                                      backgroundColor: Colors.red),
                                 );
                               } else {
                                 if (!mounted) return;
-                                Navigator.of(context).push(MaterialPageRoute(builder: (_) => VideoPage(coffee: coffee)));
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (_) => VideoPage(coffee: coffee)));
                               }
                             } catch (e) {
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Chyba: $e'), backgroundColor: Colors.red),
+                                SnackBar(
+                                    content: Text('Chyba: $e'),
+                                    backgroundColor: Colors.red),
                               );
                             } finally {
                               if (mounted) {
@@ -432,10 +461,15 @@ class _QRScannerPageState extends State<QRScannerPage> with WidgetsBindingObserv
                           backgroundColor: const Color(0xFFFF5722),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 18),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                           elevation: 2,
                         ),
-                        child: const Text('SLOŽENÍ', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
+                        child: const Text('SLOŽENÍ',
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.3)),
                       ),
                     ),
                   ],
@@ -469,11 +503,12 @@ class _LoadingCoffeePageState extends State<LoadingCoffeePage> {
     try {
       final coffee = await client.coffee.getCoffeeByQR(widget.qrCode);
       if (!mounted) return;
-      
+
       if (coffee == null) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('QR kód nenalezen'), backgroundColor: Colors.red),
+          const SnackBar(
+              content: Text('QR kód nenalezen'), backgroundColor: Colors.red),
         );
         return;
       }
@@ -502,7 +537,10 @@ class _LoadingCoffeePageState extends State<LoadingCoffeePage> {
             SizedBox(height: 24),
             Text(
               'Načítání...',
-              style: TextStyle(color: Colors.black87, fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -536,7 +574,7 @@ class _VideoPageState extends State<VideoPage> {
       final videoUrl = getMediaUrl(widget.coffee.videoUrl);
       print('🎥 DEBUG: Loading video from: $videoUrl');
       print('🎥 DEBUG: Original URL from DB: ${widget.coffee.videoUrl}');
-      
+
       _videoController = VideoPlayerController.networkUrl(
         Uri.parse(videoUrl),
         videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
@@ -601,7 +639,9 @@ class _VideoPageState extends State<VideoPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.white))
           : _error != null
-              ? Center(child: Text('Chyba: $_error', style: const TextStyle(color: Colors.white)))
+              ? Center(
+                  child: Text('Chyba: $_error',
+                      style: const TextStyle(color: Colors.white)))
               : Column(
                   children: [
                     Expanded(
@@ -616,7 +656,8 @@ class _VideoPageState extends State<VideoPage> {
                       padding: const EdgeInsets.all(24),
                       decoration: const BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(24)),
                       ),
                       child: SafeArea(
                         top: false,
@@ -625,12 +666,14 @@ class _VideoPageState extends State<VideoPage> {
                           children: [
                             Text(
                               widget.coffee.name,
-                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                  fontSize: 24, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               widget.coffee.description,
-                              style: const TextStyle(fontSize: 14, color: Colors.black87),
+                              style: const TextStyle(
+                                  fontSize: 14, color: Colors.black87),
                             ),
                             const SizedBox(height: 20),
                             SizedBox(
@@ -639,16 +682,22 @@ class _VideoPageState extends State<VideoPage> {
                               child: ElevatedButton(
                                 onPressed: () {
                                   Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (_) => InfoMenuPage(coffee: widget.coffee),
+                                    builder: (_) =>
+                                        InfoMenuPage(coffee: widget.coffee),
                                   ));
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF8BC34A),
                                   foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
                                   elevation: 2,
                                 ),
-                                child: const Text('VÍCE INFORMACÍ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                                child: const Text('VÍCE INFORMACÍ',
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.5)),
                               ),
                             ),
                           ],
@@ -692,25 +741,34 @@ class InfoMenuPage extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.grey[200],
                         borderRadius: BorderRadius.circular(12),
-                        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: const Offset(0, 4))],
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 10,
+                              offset: const Offset(0, 4))
+                        ],
                       ),
                       child: coffee.imageUrl.isNotEmpty
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Image.network(getMediaUrl(coffee.imageUrl), fit: BoxFit.cover),
+                              child: Image.network(getMediaUrl(coffee.imageUrl),
+                                  fit: BoxFit.cover),
                             )
-                          : Icon(Icons.coffee, size: 80, color: Colors.grey[400]),
+                          : Icon(Icons.coffee,
+                              size: 80, color: Colors.grey[400]),
                     ),
                     const SizedBox(height: 24),
                     Text(
                       coffee.name,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
                     Text(
                       coffee.description,
-                      style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
+                      style: const TextStyle(
+                          fontSize: 14, color: Colors.black87, height: 1.5),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -737,10 +795,15 @@ class InfoMenuPage extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF8BC34A),
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         elevation: 2,
                       ),
-                      child: const Text('VÍCE INFORMACÍ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                      child: const Text('VÍCE INFORMACÍ',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5)),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -760,10 +823,15 @@ class InfoMenuPage extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF5722),
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         elevation: 2,
                       ),
-                      child: const Text('SLOŽENÍ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                      child: const Text('SLOŽENÍ',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5)),
                     ),
                   ),
                 ],
@@ -812,14 +880,22 @@ class InfoDetailPage extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: Colors.grey[200],
                               borderRadius: BorderRadius.circular(12),
-                              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: const Offset(0, 4))],
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4))
+                              ],
                             ),
                             child: coffee.imageUrl.isNotEmpty
                                 ? ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
-                                    child: Image.network(getMediaUrl(coffee.imageUrl), fit: BoxFit.cover),
+                                    child: Image.network(
+                                        getMediaUrl(coffee.imageUrl),
+                                        fit: BoxFit.cover),
                                   )
-                                : Icon(Icons.coffee, size: 60, color: Colors.grey[400]),
+                                : Icon(Icons.coffee,
+                                    size: 60, color: Colors.grey[400]),
                           ),
                         ],
                       ),
@@ -831,12 +907,16 @@ class InfoDetailPage extends StatelessWidget {
                         children: [
                           Text(
                             title,
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             content,
-                            style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.6),
+                            style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black87,
+                                height: 1.6),
                           ),
                         ],
                       ),
@@ -858,10 +938,15 @@ class InfoDetailPage extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFF5722),
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                       elevation: 3,
                     ),
-                    child: const Text('ZPĚT', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                    child: const Text('ZPĚT',
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5)),
                   ),
                 ),
               ),
@@ -902,34 +987,37 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _saveSettings() async {
     setState(() => _isSaving = true);
-    
+
     try {
       final apiUrl = _apiUrlController.text.trim();
       final staticUrl = _staticUrlController.text.trim();
-      
+
       // Validate URLs
       if (apiUrl.isEmpty || staticUrl.isEmpty) {
         throw Exception('URL nesmí být prázdná');
       }
-      
+
       if (!apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
         throw Exception('API URL musí začínat http:// nebo https://');
       }
-      
-      if (!staticUrl.startsWith('http://') && !staticUrl.startsWith('https://')) {
+
+      if (!staticUrl.startsWith('http://') &&
+          !staticUrl.startsWith('https://')) {
         throw Exception('Static URL musí začínat http:// nebo https://');
       }
-      
+
       // Save settings
       await saveServerSettings(apiUrl, staticUrl);
-      
+
       // Reinitialize client
-      client = Client(serverUrl)..connectivityMonitor = FlutterConnectivityMonitor();
-      
+      client = Client(serverUrl)
+        ..connectivityMonitor = FlutterConnectivityMonitor();
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Nastavení uloženo! Restartujte aplikaci pro aplikování změn.'),
+            content: Text(
+                'Nastavení uloženo! Restartujte aplikaci pro aplikování změn.'),
             backgroundColor: Color(0xFF8BC34A),
             duration: Duration(seconds: 3),
           ),
@@ -1012,7 +1100,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 decoration: InputDecoration(
                   hintText: 'http://192.168.0.112:8080/',
                   prefixIcon: const Icon(Icons.dns),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   filled: true,
                   fillColor: Colors.white,
                 ),
@@ -1034,7 +1123,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 decoration: InputDecoration(
                   hintText: 'http://192.168.0.112:8090',
                   prefixIcon: const Icon(Icons.video_library),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   filled: true,
                   fillColor: Colors.white,
                 ),
@@ -1054,16 +1144,20 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF8BC34A),
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     elevation: 2,
                   ),
                   child: _isSaving
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2),
                         )
-                      : const Text('ULOŽIT', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      : const Text('ULOŽIT',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(height: 12),
@@ -1075,9 +1169,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: const Color(0xFF8BC34A),
                     side: const BorderSide(color: Color(0xFF8BC34A), width: 2),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('OBNOVIT VÝCHOZÍ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: const Text('OBNOVIT VÝCHOZÍ',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(height: 24),
@@ -1092,17 +1189,20 @@ class _SettingsPageState extends State<SettingsPage> {
                   children: [
                     const Text(
                       'Aktuální nastavení:',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'API: $serverUrl',
-                      style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
+                      style: const TextStyle(
+                          fontSize: 12, fontFamily: 'monospace'),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Static: $staticServerUrl',
-                      style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
+                      style: const TextStyle(
+                          fontSize: 12, fontFamily: 'monospace'),
                     ),
                   ],
                 ),
@@ -1114,5 +1214,3 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 }
-
-

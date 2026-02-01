@@ -1,5 +1,6 @@
 import 'package:ctecka_etiket_client/ctecka_etiket_client.dart';
 import 'package:flutter/material.dart';
+import 'admin_theme.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:file_picker/file_picker.dart';
@@ -49,16 +50,9 @@ class AdminApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Čtečka Etiket - Admin',
-      theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFFF5F1EB),
-        primaryColor: const Color(0xFF8BC34A),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF8BC34A),
-          primary: const Color(0xFF8BC34A),
-          secondary: const Color(0xFFFF5722),
-        ),
-        useMaterial3: true,
-      ),
+      theme: AdminTheme.lightTheme,
+      darkTheme: AdminTheme.darkTheme,
+      themeMode: ThemeMode.light,
       home: const LoginPage(),
       debugShowCheckedModeBanner: false,
     );
