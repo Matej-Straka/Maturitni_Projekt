@@ -1,7 +1,8 @@
+import 'dart:convert';
+
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
-import 'package:crypto/crypto.dart';
-import 'dart:convert';
+import 'package:bcrypt/bcrypt.dart';
 import 'dart:io';
 
 /// Endpoint for admin operations (content management)
@@ -9,6 +10,12 @@ class AdminEndpoint extends Endpoint {
   // Simple auth check - in production use proper JWT/session management
   Future<bool> _isAdmin(Session session, String username, String password) async {
     try {
+      // Rate limiting check
+      if (!await _checkRateLimit(session, username)) {
+        session.log('Rate limit exceeded for user: $username', level: LogLevel.warning);
+        return false;
+      }
+
       final user = await AppUser.db.findFirstRow(
         session,
         where: (t) => t.username.equals(username) & t.isActive.equals(true),
@@ -16,17 +23,44 @@ class AdminEndpoint extends Endpoint {
 
       if (user == null) return false;
 
-      final hashedPassword = sha256.convert(utf8.encode(password)).toString();
-      return user.passwordHash == hashedPassword && user.role == 'admin';
+      // Use bcrypt for password verification
+      final isValid = BCrypt.checkpw(password, user.passwordHash);
+      return isValid && user.role == 'admin';
     } catch (e) {
       session.log('_isAdmin error: $e', level: LogLevel.error);
       return false;
     }
   }
 
+  // Simple rate limiting - tracks failed attempts
+  final Map<String, List<DateTime>> _loginAttempts = {};
+  
+  Future<bool> _checkRateLimit(Session session, String username) async {
+    final now = DateTime.now();
+    final attempts = _loginAttempts[username] ?? [];
+    
+    // Remove attempts older than 15 minutes
+    attempts.removeWhere((time) => now.difference(time).inMinutes > 15);
+    
+    // Allow max 10 attempts per 15 minutes
+    if (attempts.length >= 10) {
+      return false;
+    }
+    
+    attempts.add(now);
+    _loginAttempts[username] = attempts;
+    return true;
+  }
+
   // Check if user has required role (admin, editor, or viewer)
   Future<bool> _hasRole(Session session, String username, String password, List<String> allowedRoles) async {
     try {
+      // Rate limiting check
+      if (!await _checkRateLimit(session, username)) {
+        session.log('Rate limit exceeded for user: $username', level: LogLevel.warning);
+        return false;
+      }
+
       final user = await AppUser.db.findFirstRow(
         session,
         where: (t) => t.username.equals(username) & t.isActive.equals(true),
@@ -34,8 +68,9 @@ class AdminEndpoint extends Endpoint {
 
       if (user == null) return false;
 
-      final hashedPassword = sha256.convert(utf8.encode(password)).toString();
-      if (user.passwordHash != hashedPassword) return false;
+      // Use bcrypt for password verification
+      final isValid = BCrypt.checkpw(password, user.passwordHash);
+      if (!isValid) return false;
 
       return allowedRoles.contains(user.role);
     } catch (e) {
@@ -54,8 +89,9 @@ class AdminEndpoint extends Endpoint {
 
       if (user == null) return null;
 
-      final hashedPassword = sha256.convert(utf8.encode(password)).toString();
-      if (user.passwordHash != hashedPassword) return null;
+      // Use bcrypt for password verification
+      final isValid = BCrypt.checkpw(password, user.passwordHash);
+      if (!isValid) return null;
 
       return user.role;
     } catch (e) {
@@ -284,7 +320,8 @@ class AdminEndpoint extends Endpoint {
     }
 
     try {
-      final hashedPassword = sha256.convert(utf8.encode(newPassword)).toString();
+      // Use bcrypt with cost factor 12 for strong security
+      final hashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
 
       final user = AppUser(
         username: newUsername,
@@ -343,7 +380,8 @@ class AdminEndpoint extends Endpoint {
       if (email != null) user.email = email;
       if (role != null) user.role = role;
       if (newPassword != null) {
-        user.passwordHash = sha256.convert(utf8.encode(newPassword)).toString();
+        // Use bcrypt for password hashing
+        user.passwordHash = BCrypt.hashpw(newPassword, BCrypt.gensalt());
       }
 
       final updated = await AppUser.db.updateRow(session, user);
@@ -425,6 +463,13 @@ class AdminEndpoint extends Endpoint {
     String password,
   ) async {
     session.log('LOGIN CALLED: username=$username', level: LogLevel.info);
+    
+    // Rate limiting check
+    if (!await _checkRateLimit(session, username)) {
+      session.log('Rate limit exceeded for user: $username', level: LogLevel.warning);
+      throw Exception('Too many login attempts. Please try again later.');
+    }
+    
     try {
       final user = await AppUser.db.findFirstRow(
         session,
@@ -438,10 +483,11 @@ class AdminEndpoint extends Endpoint {
         return null;
       }
 
-      final hashedPassword = sha256.convert(utf8.encode(password)).toString();
-      session.log('Hash check: ${user.passwordHash} == $hashedPassword', level: LogLevel.info);
+      // Use bcrypt for password verification
+      final isValid = BCrypt.checkpw(password, user.passwordHash);
+      session.log('Password check result: $isValid', level: LogLevel.info);
       
-      if (user.passwordHash == hashedPassword) {
+      if (isValid) {
         // Update last login
         final updated = user.copyWith(lastLogin: DateTime.now());
         await AppUser.db.updateRow(session, updated);

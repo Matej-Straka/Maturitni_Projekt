@@ -6,17 +6,19 @@
 -- Password: admin123
 -- Email: admin@example.com
 -- Role: admin
+-- Hash: bcrypt with cost 10
 
 INSERT INTO app_user (username, password_hash, email, role, is_active, created_at)
 VALUES (
   'admin',
-  '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9',
+  '$2a$10$Pm7XAY5vJaQYNChtEXPZrO8FU2Ot7hikeSQcEcSjv.DHwEn2hnlpS',
   'admin@example.com',
   'admin',
   true,
   NOW()
 )
-ON CONFLICT (username) DO NOTHING;
+ON CONFLICT (username) DO UPDATE SET 
+  password_hash = EXCLUDED.password_hash;
 
 -- Ukázková káva pro testování
 INSERT INTO coffee (name, description, composition, more_info, video_url, image_url, created_at, updated_at)
