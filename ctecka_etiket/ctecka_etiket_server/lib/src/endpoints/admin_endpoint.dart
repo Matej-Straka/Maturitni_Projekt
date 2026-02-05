@@ -14,15 +14,10 @@ class AdminEndpoint extends Endpoint {
         where: (t) => t.username.equals(username) & t.isActive.equals(true),
       );
 
-      if (user == null) {
-        session.log('_isAdmin: User not found: $username', level: LogLevel.warning);
-        return false;
-      }
+      if (user == null) return false;
 
       final hashedPassword = sha256.convert(utf8.encode(password)).toString();
-      final isAdmin = user.passwordHash == hashedPassword && user.role == 'admin';
-      session.log('_isAdmin: User $username, role=${user.role}, isAdmin=$isAdmin', level: LogLevel.info);
-      return isAdmin;
+      return user.passwordHash == hashedPassword && user.role == 'admin';
     } catch (e) {
       session.log('_isAdmin error: $e', level: LogLevel.error);
       return false;
@@ -37,20 +32,12 @@ class AdminEndpoint extends Endpoint {
         where: (t) => t.username.equals(username) & t.isActive.equals(true),
       );
 
-      if (user == null) {
-        session.log('_hasRole: User not found: $username', level: LogLevel.warning);
-        return false;
-      }
+      if (user == null) return false;
 
       final hashedPassword = sha256.convert(utf8.encode(password)).toString();
-      if (user.passwordHash != hashedPassword) {
-        session.log('_hasRole: Wrong password for user: $username', level: LogLevel.warning);
-        return false;
-      }
+      if (user.passwordHash != hashedPassword) return false;
 
-      final hasRole = allowedRoles.contains(user.role);
-      session.log('_hasRole: User $username, role=${user.role}, allowed=$allowedRoles, hasRole=$hasRole', level: LogLevel.info);
-      return hasRole;
+      return allowedRoles.contains(user.role);
     } catch (e) {
       session.log('_hasRole error: $e', level: LogLevel.error);
       return false;
@@ -65,18 +52,11 @@ class AdminEndpoint extends Endpoint {
         where: (t) => t.username.equals(username) & t.isActive.equals(true),
       );
 
-      if (user == null) {
-        session.log('User not found: $username', level: LogLevel.warning);
-        return null;
-      }
+      if (user == null) return null;
 
       final hashedPassword = sha256.convert(utf8.encode(password)).toString();
-      if (user.passwordHash != hashedPassword) {
-        session.log('Wrong password for user: $username', level: LogLevel.warning);
-        return null;
-      }
+      if (user.passwordHash != hashedPassword) return null;
 
-      session.log('User $username has role: ${user.role}', level: LogLevel.info);
       return user.role;
     } catch (e) {
       session.log('Error getting user role: $e', level: LogLevel.error);
@@ -287,44 +267,6 @@ class AdminEndpoint extends Endpoint {
     String password,
   ) async {
     return await _getUserRole(session, username, password);
-  }
-
-  /// Debug: Get all users with their roles (temporary for debugging)
-  Future<Map<String, dynamic>> debugGetAllUsersInfo(
-    Session session,
-    String username,
-    String password,
-  ) async {
-    try {
-      // Basic auth check
-      final currentUser = await AppUser.db.findFirstRow(
-        session,
-        where: (t) => t.username.equals(username) & t.isActive.equals(true),
-      );
-      
-      if (currentUser == null) return {'error': 'User not found'};
-      
-      final hashedPassword = sha256.convert(utf8.encode(password)).toString();
-      if (currentUser.passwordHash != hashedPassword) return {'error': 'Wrong password'};
-
-      final allUsers = await AppUser.db.find(session);
-      final usersInfo = allUsers.map((u) => {
-        'id': u.id,
-        'username': u.username,
-        'email': u.email,
-        'role': u.role,
-        'isActive': u.isActive,
-      }).toList();
-
-      return {
-        'currentUser': currentUser.username,
-        'currentUserRole': currentUser.role,
-        'allUsers': usersInfo,
-      };
-    } catch (e) {
-      session.log('Error in debugGetAllUsersInfo: $e', level: LogLevel.error);
-      return {'error': e.toString()};
-    }
   }
 
   /// Create new admin user

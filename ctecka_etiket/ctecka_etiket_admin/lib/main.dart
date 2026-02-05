@@ -322,30 +322,28 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Text('Dashboard', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-              const Spacer(),
-              ElevatedButton.icon(
-                onPressed: _debugShowUserRoles,
-                icon: const Icon(Icons.bug_report),
-                label: const Text('DEBUG: Zobrazit role'),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              ),
-            ],
-          ),
+          const Text('Dashboard', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
           const SizedBox(height: 32),
           Expanded(
-            child: GridView.count(
-              crossAxisCount: 3,
-              crossAxisSpacing: 24,
-              mainAxisSpacing: 24,
-              childAspectRatio: 1.5,
-              children: [
-                _buildStatCard('Etikety', '0', Icons.local_cafe, const Color(0xFF8BC34A)),
-                _buildStatCard('QR kódy', '0', Icons.qr_code, const Color(0xFF8BC34A)),
-                _buildStatCard('Videa', '0', Icons.video_library, const Color(0xFFFF5722)),
-              ],
+            child: FutureBuilder<Map<String, int>>(
+              future: _loadStats(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final stats = snapshot.data!;
+                return GridView.count(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 24,
+                  mainAxisSpacing: 24,
+                  childAspectRatio: 1.5,
+                  children: [
+                    _buildStatCard('Etikety', '${stats['coffees'] ?? 0}', Icons.local_cafe, const Color(0xFF8BC34A)),
+                    _buildStatCard('QR kódy', '${stats['qrCodes'] ?? 0}', Icons.qr_code, const Color(0xFF8BC34A)),
+                    _buildStatCard('Soubory', '${stats['media'] ?? 0}', Icons.video_library, const Color(0xFFFF5722)),
+                  ],
+                );
+              },
             ),
           ),
         ],
@@ -353,38 +351,19 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Future<void> _debugShowUserRoles() async {
+  Future<Map<String, int>> _loadStats() async {
     try {
-      final result = await client.admin.debugGetAllUsersInfo(widget.username, widget.password);
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Debug: Role uživatelů'),
-            content: SizedBox(
-              width: 600,
-              child: SingleChildScrollView(
-                child: SelectableText(
-                  const JsonEncoder.withIndent('  ').convert(result),
-                  style: const TextStyle(fontFamily: 'monospace'),
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('ZAVŘÍT'),
-              ),
-            ],
-          ),
-        );
-      }
+      final coffees = await client.coffee.getAllCoffees();
+      final qrCodes = await client.admin.getAllQRMappings(widget.username, widget.password);
+      final media = await client.admin.getAllMedia(widget.username, widget.password);
+      
+      return {
+        'coffees': coffees.length,
+        'qrCodes': qrCodes.length,
+        'media': media.length,
+      };
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Chyba: $e'), backgroundColor: Colors.red),
-        );
-      }
+      return {'coffees': 0, 'qrCodes': 0, 'media': 0};
     }
   }
 

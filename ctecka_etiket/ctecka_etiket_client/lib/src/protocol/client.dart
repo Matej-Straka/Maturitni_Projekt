@@ -175,20 +175,6 @@ class EndpointAdmin extends _i1.EndpointRef {
         },
       );
 
-  /// Debug: Get all users with their roles (temporary for debugging)
-  _i2.Future<Map<String, dynamic>> debugGetAllUsersInfo(
-    String username,
-    String password,
-  ) =>
-      caller.callServerEndpoint<Map<String, dynamic>>(
-        'admin',
-        'debugGetAllUsersInfo',
-        {
-          'username': username,
-          'password': password,
-        },
-      );
-
   /// Create new admin user
   _i2.Future<_i5.AppUser?> createUser(
     String adminUsername,

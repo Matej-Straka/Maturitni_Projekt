@@ -344,30 +344,6 @@ class Endpoints extends _i1.EndpointDispatch {
             params['password'],
           ),
         ),
-        'debugGetAllUsersInfo': _i1.MethodConnector(
-          name: 'debugGetAllUsersInfo',
-          params: {
-            'username': _i1.ParameterDescription(
-              name: 'username',
-              type: _i1.getType<String>(),
-              nullable: false,
-            ),
-            'password': _i1.ParameterDescription(
-              name: 'password',
-              type: _i1.getType<String>(),
-              nullable: false,
-            ),
-          },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).debugGetAllUsersInfo(
-            session,
-            params['username'],
-            params['password'],
-          ),
-        ),
         'createUser': _i1.MethodConnector(
           name: 'createUser',
           params: {
