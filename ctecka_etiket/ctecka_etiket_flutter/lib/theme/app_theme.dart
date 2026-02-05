@@ -11,6 +11,12 @@ class AppTheme {
   static const Color warning = Color(0xFFFF5722);
   static const Color scaffold = Color(0x4FEDDDBB);
   static const Color scaffoldAlt = Color(0x4FEDDDBB);
+  static const Color surface = Color.fromRGBO(251, 247, 238, 1);
+  static const Color closebutton = Color.fromRGBO(236, 104, 57, 1);
+  static const Color firstbutton = Color.fromRGBO(201, 221, 159, 1);
+  static const Color secondbutton = Color.fromRGBO(176, 209, 120, 1);
+  static const Color black = Color(0xFF1A1C29);
+
 
   // Shape/spacing tokens
   static const double radius = 12.0;
@@ -29,8 +35,7 @@ class AppTheme {
         seedColor: primary,
         primary: primary,
         secondary: secondary,
-        surface: Colors.white,
-        background: scaffold,
+        surface: surface,
         brightness: Brightness.light,
       ),
       scaffoldBackgroundColor: scaffold,
@@ -38,14 +43,14 @@ class AppTheme {
 
     return base.copyWith(
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFF5F1EB),
         elevation: 0,
         foregroundColor: Colors.black,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: secondary,
-          foregroundColor: Colors.white,
+          foregroundColor: const Color(0xFFF5F1EB),
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radius),

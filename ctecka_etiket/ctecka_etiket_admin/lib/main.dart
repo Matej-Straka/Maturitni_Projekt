@@ -8,8 +8,8 @@ import 'dart:io';
 import 'dart:convert';
 
 late final Client client;
-const serverUrl = String.fromEnvironment('SERVER_URL', defaultValue: 'http://localhost:8080/');
-const staticServerUrl = String.fromEnvironment('STATIC_SERVER_URL', defaultValue: 'http://localhost:8090');
+const serverUrl = String.fromEnvironment('SERVER_URL', defaultValue: 'http://34.122.70.47:8080/');
+const staticServerUrl = String.fromEnvironment('STATIC_SERVER_URL', defaultValue: 'http://34.122.70.47:8090');
 
 // Helper function to get full URL for media files
 String getMediaUrl(String url) {
@@ -38,7 +38,7 @@ Future<String?> uploadFile(File file, String type, String username, String passw
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  const serverUrl = String.fromEnvironment('SERVER_URL', defaultValue: 'http://localhost:8080/');
+  const serverUrl = String.fromEnvironment('SERVER_URL', defaultValue: 'http://34.122.70.47:8080/');
   client = Client(serverUrl)..connectivityMonitor = FlutterConnectivityMonitor();
   runApp(const AdminApp());
 }

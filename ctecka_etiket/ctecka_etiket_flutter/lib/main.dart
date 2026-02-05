@@ -1,5 +1,6 @@
 import 'package:ctecka_etiket_client/ctecka_etiket_client.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:video_player/video_player.dart';
@@ -9,8 +10,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'theme/app_theme.dart';
 
 late Client client;
-String serverUrl = 'http://192.168.0.112:8080/';
-String staticServerUrl = 'http://192.168.0.112:8090';
+String serverUrl = 'http://34.122.70.47:8080/';
+String staticServerUrl = 'http://34.122.70.47:8090/';
 
 // Helper function to get full URL for media files
 String getMediaUrl(String url) {
@@ -26,9 +27,9 @@ String getMediaUrl(String url) {
 // Load server settings from SharedPreferences
 Future<void> loadServerSettings() async {
   final prefs = await SharedPreferences.getInstance();
-  serverUrl = prefs.getString('serverUrl') ?? 'http://192.168.0.112:8080/';
+  serverUrl = prefs.getString('serverUrl') ?? 'http://34.122.70.47:8080/';
   staticServerUrl =
-      prefs.getString('staticServerUrl') ?? 'http://192.168.0.112:8090';
+      prefs.getString('staticServerUrl') ?? 'http://34.122.70.47:8090/';
 }
 
 // Save server settings to SharedPreferences
@@ -45,6 +46,8 @@ void main() async {
   await loadServerSettings();
   client = Client(serverUrl)
     ..connectivityMonitor = FlutterConnectivityMonitor();
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   runApp(const MyApp());
 }
 
@@ -80,8 +83,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
 
   Widget _buildPage(String title, String body) {
     return Container(
-      color: const Color(0xFFF5F1EB),
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 30),
       child: Column(
         children: [
           const Spacer(flex: 2),
@@ -160,8 +163,10 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF97C451),
-                foregroundColor: Colors.black,
+                backgroundColor: AppTheme.primary,
+                foregroundColor: AppTheme.black,
+                minimumSize: Size.zero,
+                padding: EdgeInsets.zero,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
                 elevation: 1,
@@ -174,7 +179,6 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                       letterSpacing: 0.5)),
             ),
           ),
-          const Spacer(flex: 1),
         ],
       ),
     );
@@ -183,6 +187,10 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      backgroundColor: AppTheme.surface,
+
       body: SafeArea(
         child: PageView(
           controller: _pc,
@@ -285,18 +293,19 @@ class _QRScannerPageState extends State<QRScannerPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F1EB),
+      backgroundColor: AppTheme.surface,
       body: Stack(
         children: [
           QRView(
             key: qrKey,
             onQRViewCreated: _onQRViewCreated,
             overlay: QrScannerOverlayShape(
-              borderColor: const Color(0xFF8BC34A),
+              borderColor: AppTheme.primary,
               borderRadius: 20,
               borderLength: 40,
               borderWidth: 8,
               cutOutSize: MediaQuery.of(context).size.width * 0.7,
+              overlayColor: Colors.black.withAlpha(420)
             ),
           ),
           // Info text nahoře
@@ -312,7 +321,7 @@ class _QRScannerPageState extends State<QRScannerPage>
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.black.withOpacity(0.7), Colors.transparent],
+                    colors: [Colors.transparent, Colors.transparent],
                   ),
                 ),
                 child: Row(
@@ -322,8 +331,10 @@ class _QRScannerPageState extends State<QRScannerPage>
                         'Namiřte fotoaparát na QR kód',
                         style: TextStyle(
                             color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600),
+                            fontSize: 25,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Snug Variable",
+                            ),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -346,57 +357,11 @@ class _QRScannerPageState extends State<QRScannerPage>
             right: 0,
             bottom: 0,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(32)),
-                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 20)],
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 30),
               child: SafeArea(
+  
                 top: false,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Zobraz dialog s návodem
-                          showDialog(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              title: const Text('Návod k použití'),
-                              content: const Text(
-                                'Namiřte fotoaparát na QR kód kávy.\n\n'
-                                'Po úspěšném načtení QR kódu se automaticky přehraje video s informacemi o kávě.\n\n'
-                                'Pokud chcete zadat QR kód ručně, stiskněte tlačítko "Manuální".',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(ctx),
-                                  child: const Text('Rozumím'),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF8BC34A),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 18),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          elevation: 2,
-                        ),
-                        child: const Text('VÍCE INFORMACÍ',
-                            style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.3)),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton(
+                child: ElevatedButton(
                         onPressed: () async {
                           // Zobraz dialog pro manuální zadání QR kódu
                           final controller = TextEditingController();
@@ -458,25 +423,23 @@ class _QRScannerPageState extends State<QRScannerPage>
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF5722),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          backgroundColor: AppTheme.closebutton,
+                          foregroundColor:  const Color(0xFF000000),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12)),
                           elevation: 2,
                         ),
-                        child: const Text('SLOŽENÍ',
+                        child: const Text('Zadat kavu ručně',
                             style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.3)),
+                                fontSize: 24,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: "Snug Variable",
+                                letterSpacing: 0.5)),
                       ),
                     ),
-                  ],
                 ),
               ),
-            ),
-          ),
         ],
       ),
     );
@@ -528,19 +491,20 @@ class _LoadingCoffeePageState extends State<LoadingCoffeePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F1EB),
+      backgroundColor: AppTheme.surface,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: Color(0xFF8BC34A)),
+            CircularProgressIndicator(color: AppTheme.primary),
             SizedBox(height: 24),
             Text(
               'Načítání...',
               style: TextStyle(
-                  color: Colors.black87,
+                  color: AppTheme.black,
                   fontSize: 18,
-                  fontWeight: FontWeight.bold),
+                  fontFamily: "Snug Variable",
+                  fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -592,9 +556,9 @@ class _VideoPageState extends State<VideoPage> {
           allowFullScreen: false,
           showControls: true,
           materialProgressColors: ChewieProgressColors(
-            playedColor: const Color(0xFF8BC34A),
-            handleColor: const Color(0xFF8BC34A),
-            backgroundColor: Colors.grey.shade300,
+            playedColor: AppTheme.primary,
+            handleColor: AppTheme.primary,
+            backgroundColor: AppTheme.surface,
             bufferedColor: Colors.grey.shade400,
           ),
         );
@@ -627,7 +591,7 @@ class _VideoPageState extends State<VideoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppTheme.black,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -664,18 +628,6 @@ class _VideoPageState extends State<VideoPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              widget.coffee.name,
-                              style: const TextStyle(
-                                  fontSize: 24, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              widget.coffee.description,
-                              style: const TextStyle(
-                                  fontSize: 14, color: Colors.black87),
-                            ),
-                            const SizedBox(height: 20),
                             SizedBox(
                               width: double.infinity,
                               height: 50,
@@ -687,16 +639,18 @@ class _VideoPageState extends State<VideoPage> {
                                   ));
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF8BC34A),
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: AppTheme.secondbutton,
+                                  foregroundColor: AppTheme.black,
+                                  padding: EdgeInsets.zero,
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12)),
                                   elevation: 2,
                                 ),
-                                child: const Text('VÍCE INFORMACÍ',
+                                child: const Text('POKRAČOVAT',
                                     style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: "Snug Variable",
                                         letterSpacing: 0.5)),
                               ),
                             ),
@@ -718,12 +672,12 @@ class InfoMenuPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -761,14 +715,14 @@ class InfoMenuPage extends StatelessWidget {
                     Text(
                       coffee.name,
                       style: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold),
+                          fontSize: 36, fontWeight: FontWeight.w600),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
                     Text(
                       coffee.description,
                       style: const TextStyle(
-                          fontSize: 14, color: Colors.black87, height: 1.5),
+                          fontSize: 16, fontFamily: "Faustina", fontWeight: FontWeight.normal ,color: AppTheme.black, height: 1.5),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -787,22 +741,24 @@ class InfoMenuPage extends StatelessWidget {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (_) => InfoDetailPage(
                             coffee: coffee,
-                            title: 'Více informací',
+                            title: 'VÍCE INFORMACÍ',
                             content: coffee.moreInfo,
                           ),
                         ));
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8BC34A),
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppTheme.firstbutton,
+                        foregroundColor: AppTheme.black,
+                        padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                         elevation: 2,
                       ),
                       child: const Text('VÍCE INFORMACÍ',
                           style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: "Snug Variable",
                               letterSpacing: 0.5)),
                     ),
                   ),
@@ -815,22 +771,49 @@ class InfoMenuPage extends StatelessWidget {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (_) => InfoDetailPage(
                             coffee: coffee,
-                            title: 'Složení',
+                            title: 'SLOŽENÍ',
                             content: coffee.composition,
                           ),
                         ));
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFF5722),
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppTheme.secondbutton,
+                        foregroundColor: AppTheme.black,
+                        padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                         elevation: 2,
                       ),
                       child: const Text('SLOŽENÍ',
                           style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: "Snug Variable",
+                              letterSpacing: 0.5)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.closebutton,
+                        padding: EdgeInsets.zero,
+                        foregroundColor: AppTheme.black,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        elevation: 2,
+                      ),
+                      child: const Text('ZAVŘÍT',
+                          style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: "Snug Variable",
                               letterSpacing: 0.5)),
                     ),
                   ),
@@ -860,7 +843,7 @@ class InfoDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF8F5),
+      backgroundColor: AppTheme.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -871,7 +854,7 @@ class InfoDetailPage extends StatelessWidget {
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 40),
-                      color: Colors.white,
+                      color: AppTheme.surface,
                       child: Column(
                         children: [
                           Container(
@@ -903,20 +886,17 @@ class InfoDetailPage extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.all(24),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             title,
                             style: const TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
+                          fontSize: 36, fontWeight: FontWeight.w600),
+                      textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             content,
-                            style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.black87,
-                                height: 1.6),
+                            style: const TextStyle(fontSize: 16, fontFamily: "Faustina", fontWeight: FontWeight.normal ,color: AppTheme.black, height: 1.5),
                           ),
                         ],
                       ),
@@ -927,7 +907,7 @@ class InfoDetailPage extends StatelessWidget {
             ),
             Container(
               padding: const EdgeInsets.all(24),
-              color: Colors.white,
+              color: AppTheme.surface,
               child: SafeArea(
                 top: false,
                 child: SizedBox(
@@ -936,17 +916,20 @@ class InfoDetailPage extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFF5722),
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppTheme.closebutton,
+                      foregroundColor: AppTheme.black,
+                      padding: EdgeInsets.zero,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                       elevation: 3,
                     ),
                     child: const Text('ZPĚT',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5)),
+                        style: 
+                          TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: "Snug Variable",
+                              letterSpacing: 0.5)),
                   ),
                 ),
               ),
@@ -1042,25 +1025,25 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _resetToDefaults() async {
     setState(() {
-      _apiUrlController.text = 'http://192.168.0.112:8080/';
-      _staticUrlController.text = 'http://192.168.0.112:8090';
+      _apiUrlController.text = 'http://34.122.70.47:8080/';
+      _staticUrlController.text = 'http://34.122.70.47:8090/';
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F1EB),
+      backgroundColor: AppTheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.black),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Nastavení serveru',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(color: AppTheme.black, fontWeight: FontWeight.bold),
         ),
       ),
       body: SafeArea(
@@ -1098,7 +1081,7 @@ class _SettingsPageState extends State<SettingsPage> {
               TextField(
                 controller: _apiUrlController,
                 decoration: InputDecoration(
-                  hintText: 'http://192.168.0.112:8080/',
+                  hintText: 'http://34.122.70.47:8080/',
                   prefixIcon: const Icon(Icons.dns),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
@@ -1110,7 +1093,7 @@ class _SettingsPageState extends State<SettingsPage> {
               const SizedBox(height: 8),
               const Text(
                 'Port pro REST API endpointy',
-                style: TextStyle(fontSize: 12, color: Colors.black54),
+                style: TextStyle(fontSize: 12, color: AppTheme.black),
               ),
               const SizedBox(height: 24),
               const Text(
@@ -1121,7 +1104,7 @@ class _SettingsPageState extends State<SettingsPage> {
               TextField(
                 controller: _staticUrlController,
                 decoration: InputDecoration(
-                  hintText: 'http://192.168.0.112:8090',
+                  hintText: 'http://34.122.70.47:8090/',
                   prefixIcon: const Icon(Icons.video_library),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
@@ -1133,7 +1116,7 @@ class _SettingsPageState extends State<SettingsPage> {
               const SizedBox(height: 8),
               const Text(
                 'Port pro videa a obrázky',
-                style: TextStyle(fontSize: 12, color: Colors.black54),
+                style: TextStyle(fontSize: 12, color: AppTheme.black),
               ),
               const SizedBox(height: 32),
               SizedBox(
