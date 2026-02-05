@@ -183,9 +183,45 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
+  String? _userRole;
+  bool _loadingRole = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserRole();
+  }
+
+  Future<void> _loadUserRole() async {
+    try {
+      final role = await client.admin.getCurrentUserRole(widget.username, widget.password);
+      if (mounted) {
+        setState(() {
+          _userRole = role;
+          _loadingRole = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _userRole = 'viewer'; // fallback
+          _loadingRole = false;
+        });
+      }
+    }
+  }
+
+  bool get _canEdit => _userRole == 'admin' || _userRole == 'editor';
+  bool get _isAdmin => _userRole == 'admin';
+  bool get _isViewer => _userRole == 'viewer';
 
   @override
   Widget build(BuildContext context) {
+    if (_loadingRole) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       body: Row(
         children: [
@@ -207,6 +243,19 @@ class _DashboardPageState extends State<DashboardPage> {
                       const Text('Admin Panel', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
                       Text(widget.username, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+                      if (_userRole != null)
+                        Container(
+                          margin: const EdgeInsets.only(top: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: _isAdmin ? const Color(0xFFFF5722) : (_canEdit ? const Color(0xFF2196F3) : Colors.grey),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            _userRole!.toUpperCase(),
+                            style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -215,7 +264,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 _buildMenuItem(1, Icons.local_cafe, 'Etikety'),
                 _buildMenuItem(2, Icons.qr_code, 'QR kódy'),
                 _buildMenuItem(3, Icons.people, 'Správa obsahu'),
-                _buildMenuItem(4, Icons.settings, 'Správa uživatel'),
+                if (_isAdmin) _buildMenuItem(4, Icons.settings, 'Správa uživatel'),
                 const Spacer(),
                 const Divider(height: 1, color: Color(0xFFD0C4B3)),
                 _buildMenuItem(5, Icons.logout, 'Odhlásit se', isLogout: true),
@@ -228,10 +277,10 @@ class _DashboardPageState extends State<DashboardPage> {
               index: _selectedIndex,
               children: [
                 _buildHome(),
-                CoffeeListPage(username: widget.username, password: widget.password),
-                QRListPage(username: widget.username, password: widget.password),
-                VideosPage(username: widget.username, password: widget.password),
-                UsersPage(username: widget.username, password: widget.password),
+                CoffeeListPage(username: widget.username, password: widget.password, userRole: _userRole ?? 'viewer'),
+                QRListPage(username: widget.username, password: widget.password, userRole: _userRole ?? 'viewer'),
+                VideosPage(username: widget.username, password: widget.password, userRole: _userRole ?? 'viewer'),
+                if (_isAdmin) UsersPage(username: widget.username, password: widget.password),
               ],
             ),
           ),
@@ -273,7 +322,18 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Dashboard', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+          Row(
+            children: [
+              const Text('Dashboard', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+              const Spacer(),
+              ElevatedButton.icon(
+                onPressed: _debugShowUserRoles,
+                icon: const Icon(Icons.bug_report),
+                label: const Text('DEBUG: Zobrazit role'),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+              ),
+            ],
+          ),
           const SizedBox(height: 32),
           Expanded(
             child: GridView.count(
@@ -291,6 +351,41 @@ class _DashboardPageState extends State<DashboardPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _debugShowUserRoles() async {
+    try {
+      final result = await client.admin.debugGetAllUsersInfo(widget.username, widget.password);
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Debug: Role uživatelů'),
+            content: SizedBox(
+              width: 600,
+              child: SingleChildScrollView(
+                child: SelectableText(
+                  const JsonEncoder.withIndent('  ').convert(result),
+                  style: const TextStyle(fontFamily: 'monospace'),
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('ZAVŘÍT'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Chyba: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {
@@ -324,7 +419,8 @@ class _DashboardPageState extends State<DashboardPage> {
 class CoffeeListPage extends StatefulWidget {
   final String username;
   final String password;
-  const CoffeeListPage({super.key, required this.username, required this.password});
+  final String userRole;
+  const CoffeeListPage({super.key, required this.username, required this.password, required this.userRole});
   @override
   State<CoffeeListPage> createState() => _CoffeeListPageState();
 }
@@ -332,6 +428,8 @@ class CoffeeListPage extends StatefulWidget {
 class _CoffeeListPageState extends State<CoffeeListPage> {
   List<Coffee>? _coffees;
   bool _loading = true;
+
+  bool get _canEdit => widget.userRole == 'admin' || widget.userRole == 'editor';
 
   @override
   void initState() {
@@ -368,17 +466,18 @@ class _CoffeeListPageState extends State<CoffeeListPage> {
             children: [
               const Text('Etikety', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
               const Spacer(),
-              ElevatedButton.icon(
-                onPressed: () => _showAddEditDialog(),
-                icon: const Icon(Icons.add),
-                label: const Text('PŘIDAT'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8BC34A),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              if (_canEdit)
+                ElevatedButton.icon(
+                  onPressed: () => _showAddEditDialog(),
+                  icon: const Icon(Icons.add),
+                  label: const Text('PŘIDAT'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8BC34A),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -422,14 +521,16 @@ class _CoffeeListPageState extends State<CoffeeListPage> {
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit, color: Color(0xFF8BC34A)),
-                                    onPressed: () => _showAddEditDialog(coffee: coffee),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete, color: Color(0xFFFF5722)),
-                                    onPressed: () => _deleteCoffee(coffee),
-                                  ),
+                                  if (_canEdit)
+                                    IconButton(
+                                      icon: const Icon(Icons.edit, color: Color(0xFF8BC34A)),
+                                      onPressed: () => _showAddEditDialog(coffee: coffee),
+                                    ),
+                                  if (_canEdit)
+                                    IconButton(
+                                      icon: const Icon(Icons.delete, color: Color(0xFFFF5722)),
+                                      onPressed: () => _deleteCoffee(coffee),
+                                    ),
                                 ],
                               ),
                             ),
@@ -701,7 +802,8 @@ class _CoffeeListPageState extends State<CoffeeListPage> {
 class QRListPage extends StatefulWidget {
   final String username;
   final String password;
-  const QRListPage({super.key, required this.username, required this.password});
+  final String userRole;
+  const QRListPage({super.key, required this.username, required this.password, required this.userRole});
   @override
   State<QRListPage> createState() => _QRListPageState();
 }
@@ -709,6 +811,8 @@ class QRListPage extends StatefulWidget {
 class _QRListPageState extends State<QRListPage> {
   List<QRCodeMapping>? _qrCodes;
   bool _loading = true;
+
+  bool get _canEdit => widget.userRole == 'admin' || widget.userRole == 'editor';
 
   @override
   void initState() {
@@ -745,17 +849,18 @@ class _QRListPageState extends State<QRListPage> {
             children: [
               const Text('QR kódy', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
               const Spacer(),
-              ElevatedButton.icon(
-                onPressed: () => _showAddDialog(),
-                icon: const Icon(Icons.add),
-                label: const Text('PŘIDAT'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8BC34A),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              if (_canEdit)
+                ElevatedButton.icon(
+                  onPressed: () => _showAddDialog(),
+                  icon: const Icon(Icons.add),
+                  label: const Text('PŘIDAT'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8BC34A),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -805,10 +910,11 @@ class _QRListPageState extends State<QRListPage> {
                                       ),
                                     ),
                                     const SizedBox(width: 8),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete, color: Color(0xFFFF5722)),
-                                      onPressed: () => _deleteQR(qr),
-                                    ),
+                                    if (_canEdit)
+                                      IconButton(
+                                        icon: const Icon(Icons.delete, color: Color(0xFFFF5722)),
+                                        onPressed: () => _deleteQR(qr),
+                                      ),
                                   ],
                                 ),
                               ],
@@ -982,7 +1088,8 @@ class _QRListPageState extends State<QRListPage> {
 class VideosPage extends StatefulWidget {
   final String username;
   final String password;
-  const VideosPage({super.key, required this.username, required this.password});
+  final String userRole;
+  const VideosPage({super.key, required this.username, required this.password, required this.userRole});
 
   @override
   State<VideosPage> createState() => _VideosPageState();
@@ -992,6 +1099,8 @@ class _VideosPageState extends State<VideosPage> {
   List<MediaFile>? _media;
   bool _loading = true;
   bool _uploading = false;
+
+  bool get _canEdit => widget.userRole == 'admin' || widget.userRole == 'editor';
 
   @override
   void initState() {
@@ -1115,7 +1224,7 @@ class _VideosPageState extends State<VideosPage> {
               const Spacer(),
               if (_uploading)
                 const CircularProgressIndicator()
-              else
+              else if (_canEdit)
                 ElevatedButton.icon(
                   onPressed: _uploadFile,
                   icon: const Icon(Icons.upload_file),
@@ -1203,12 +1312,13 @@ class _VideosPageState extends State<VideosPage> {
                                       ),
                                     ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete, size: 20, color: Colors.red),
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                    onPressed: () => _deleteMedia(media.id!),
-                                  ),
+                                  if (_canEdit)
+                                    IconButton(
+                                      icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                      onPressed: () => _deleteMedia(media.id!),
+                                    ),
                                 ],
                               ),
                             ],

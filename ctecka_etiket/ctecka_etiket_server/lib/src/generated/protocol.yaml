@@ -6,6 +6,8 @@ admin:
   - getAllQRMappings:
   - deleteQRMapping:
   - getRoles:
+  - getCurrentUserRole:
+  - debugGetAllUsersInfo:
   - createUser:
   - getAllUsers:
   - updateUser:
