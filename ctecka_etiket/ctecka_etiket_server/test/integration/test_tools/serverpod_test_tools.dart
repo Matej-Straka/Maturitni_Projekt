@@ -382,6 +382,39 @@ class _AdminEndpoint {
     });
   }
 
+  _i3.Future<List<String>> getRoles(
+    _i1.TestSessionBuilder sessionBuilder,
+    String username,
+    String password,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'admin',
+        method: 'getRoles',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'admin',
+          methodName: 'getRoles',
+          parameters: _i1.testObjectToJson({
+            'username': username,
+            'password': password,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<String>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _i3.Future<_i6.AppUser?> createUser(
     _i1.TestSessionBuilder sessionBuilder,
     String adminUsername,
@@ -449,6 +482,117 @@ class _AdminEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _i3.Future<List<_i6.AppUser>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i6.AppUser?> updateUser(
+    _i1.TestSessionBuilder sessionBuilder,
+    String adminUsername,
+    String adminPassword,
+    int userId,
+    String? email,
+    String? role,
+    String? newPassword,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'admin',
+        method: 'updateUser',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'admin',
+          methodName: 'updateUser',
+          parameters: _i1.testObjectToJson({
+            'adminUsername': adminUsername,
+            'adminPassword': adminPassword,
+            'userId': userId,
+            'email': email,
+            'role': role,
+            'newPassword': newPassword,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<_i6.AppUser?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<bool> deleteUser(
+    _i1.TestSessionBuilder sessionBuilder,
+    String adminUsername,
+    String adminPassword,
+    int userId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'admin',
+        method: 'deleteUser',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'admin',
+          methodName: 'deleteUser',
+          parameters: _i1.testObjectToJson({
+            'adminUsername': adminUsername,
+            'adminPassword': adminPassword,
+            'userId': userId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i6.AppUser?> toggleUserActive(
+    _i1.TestSessionBuilder sessionBuilder,
+    String adminUsername,
+    String adminPassword,
+    int userId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'admin',
+        method: 'toggleUserActive',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'admin',
+          methodName: 'toggleUserActive',
+          parameters: _i1.testObjectToJson({
+            'adminUsername': adminUsername,
+            'adminPassword': adminPassword,
+            'userId': userId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<_i6.AppUser?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

@@ -296,6 +296,30 @@ class Endpoints extends _i1.EndpointDispatch {
             params['mappingId'],
           ),
         ),
+        'getRoles': _i1.MethodConnector(
+          name: 'getRoles',
+          params: {
+            'username': _i1.ParameterDescription(
+              name: 'username',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'password': _i1.ParameterDescription(
+              name: 'password',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['admin'] as _i2.AdminEndpoint).getRoles(
+            session,
+            params['username'],
+            params['password'],
+          ),
+        ),
         'createUser': _i1.MethodConnector(
           name: 'createUser',
           params: {
@@ -366,6 +390,114 @@ class Endpoints extends _i1.EndpointDispatch {
             session,
             params['username'],
             params['password'],
+          ),
+        ),
+        'updateUser': _i1.MethodConnector(
+          name: 'updateUser',
+          params: {
+            'adminUsername': _i1.ParameterDescription(
+              name: 'adminUsername',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'adminPassword': _i1.ParameterDescription(
+              name: 'adminPassword',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'role': _i1.ParameterDescription(
+              name: 'role',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'newPassword': _i1.ParameterDescription(
+              name: 'newPassword',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['admin'] as _i2.AdminEndpoint).updateUser(
+            session,
+            params['adminUsername'],
+            params['adminPassword'],
+            params['userId'],
+            params['email'],
+            params['role'],
+            params['newPassword'],
+          ),
+        ),
+        'deleteUser': _i1.MethodConnector(
+          name: 'deleteUser',
+          params: {
+            'adminUsername': _i1.ParameterDescription(
+              name: 'adminUsername',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'adminPassword': _i1.ParameterDescription(
+              name: 'adminPassword',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['admin'] as _i2.AdminEndpoint).deleteUser(
+            session,
+            params['adminUsername'],
+            params['adminPassword'],
+            params['userId'],
+          ),
+        ),
+        'toggleUserActive': _i1.MethodConnector(
+          name: 'toggleUserActive',
+          params: {
+            'adminUsername': _i1.ParameterDescription(
+              name: 'adminUsername',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'adminPassword': _i1.ParameterDescription(
+              name: 'adminPassword',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['admin'] as _i2.AdminEndpoint).toggleUserActive(
+            session,
+            params['adminUsername'],
+            params['adminPassword'],
+            params['userId'],
           ),
         ),
         'login': _i1.MethodConnector(

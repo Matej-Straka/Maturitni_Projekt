@@ -206,6 +206,19 @@ class AdminEndpoint extends Endpoint {
 
   /// ========== User Management ==========
 
+  /// Get available user roles
+  Future<List<String>> getRoles(
+    Session session,
+    String username,
+    String password,
+  ) async {
+    if (!await _isAdmin(session, username, password)) {
+      throw Exception('Unauthorized');
+    }
+
+    return ['admin', 'editor', 'viewer'];
+  }
+
   /// Create new admin user
   Future<AppUser?> createUser(
     Session session,
@@ -255,6 +268,102 @@ class AdminEndpoint extends Endpoint {
     } catch (e) {
       session.log('Error getting users: $e', level: LogLevel.error);
       return [];
+    }
+  }
+
+  /// Update user
+  Future<AppUser?> updateUser(
+    Session session,
+    String adminUsername,
+    String adminPassword,
+    int userId,
+    String? email,
+    String? role,
+    String? newPassword,
+  ) async {
+    if (!await _isAdmin(session, adminUsername, adminPassword)) {
+      throw Exception('Unauthorized');
+    }
+
+    try {
+      final user = await AppUser.db.findById(session, userId);
+      if (user == null) return null;
+
+      if (email != null) user.email = email;
+      if (role != null) user.role = role;
+      if (newPassword != null) {
+        user.passwordHash = sha256.convert(utf8.encode(newPassword)).toString();
+      }
+
+      final updated = await AppUser.db.updateRow(session, user);
+      return updated;
+    } catch (e) {
+      session.log('Error updating user: $e', level: LogLevel.error);
+      return null;
+    }
+  }
+
+  /// Delete user
+  Future<bool> deleteUser(
+    Session session,
+    String adminUsername,
+    String adminPassword,
+    int userId,
+  ) async {
+    if (!await _isAdmin(session, adminUsername, adminPassword)) {
+      throw Exception('Unauthorized');
+    }
+
+    try {
+      // Don't allow deleting yourself
+      final admin = await AppUser.db.findFirstRow(
+        session,
+        where: (t) => t.username.equals(adminUsername),
+      );
+      if (admin?.id == userId) {
+        session.log('Cannot delete yourself', level: LogLevel.warning);
+        return false;
+      }
+
+      await AppUser.db.deleteWhere(session, where: (t) => t.id.equals(userId));
+      return true;
+    } catch (e) {
+      session.log('Error deleting user: $e', level: LogLevel.error);
+      return false;
+    }
+  }
+
+  /// Toggle user active status
+  Future<AppUser?> toggleUserActive(
+    Session session,
+    String adminUsername,
+    String adminPassword,
+    int userId,
+  ) async {
+    if (!await _isAdmin(session, adminUsername, adminPassword)) {
+      throw Exception('Unauthorized');
+    }
+
+    try {
+      final user = await AppUser.db.findById(session, userId);
+      if (user == null) return null;
+
+      // Don't allow deactivating yourself
+      final admin = await AppUser.db.findFirstRow(
+        session,
+        where: (t) => t.username.equals(adminUsername),
+      );
+      if (admin?.id == userId) {
+        session.log('Cannot deactivate yourself', level: LogLevel.warning);
+        return null;
+      }
+
+      user.isActive = !user.isActive;
+      final updated = await AppUser.db.updateRow(session, user);
+      return updated;
+    } catch (e) {
+      session.log('Error toggling user active: $e', level: LogLevel.error);
+      return null;
     }
   }
 

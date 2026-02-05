@@ -147,6 +147,20 @@ class EndpointAdmin extends _i1.EndpointRef {
       );
 
   /// ========== User Management ==========
+  /// Get available user roles
+  _i2.Future<List<String>> getRoles(
+    String username,
+    String password,
+  ) =>
+      caller.callServerEndpoint<List<String>>(
+        'admin',
+        'getRoles',
+        {
+          'username': username,
+          'password': password,
+        },
+      );
+
   /// Create new admin user
   _i2.Future<_i5.AppUser?> createUser(
     String adminUsername,
@@ -180,6 +194,60 @@ class EndpointAdmin extends _i1.EndpointRef {
         {
           'username': username,
           'password': password,
+        },
+      );
+
+  /// Update user
+  _i2.Future<_i5.AppUser?> updateUser(
+    String adminUsername,
+    String adminPassword,
+    int userId,
+    String? email,
+    String? role,
+    String? newPassword,
+  ) =>
+      caller.callServerEndpoint<_i5.AppUser?>(
+        'admin',
+        'updateUser',
+        {
+          'adminUsername': adminUsername,
+          'adminPassword': adminPassword,
+          'userId': userId,
+          'email': email,
+          'role': role,
+          'newPassword': newPassword,
+        },
+      );
+
+  /// Delete user
+  _i2.Future<bool> deleteUser(
+    String adminUsername,
+    String adminPassword,
+    int userId,
+  ) =>
+      caller.callServerEndpoint<bool>(
+        'admin',
+        'deleteUser',
+        {
+          'adminUsername': adminUsername,
+          'adminPassword': adminPassword,
+          'userId': userId,
+        },
+      );
+
+  /// Toggle user active status
+  _i2.Future<_i5.AppUser?> toggleUserActive(
+    String adminUsername,
+    String adminPassword,
+    int userId,
+  ) =>
+      caller.callServerEndpoint<_i5.AppUser?>(
+        'admin',
+        'toggleUserActive',
+        {
+          'adminUsername': adminUsername,
+          'adminPassword': adminPassword,
+          'userId': userId,
         },
       );
 

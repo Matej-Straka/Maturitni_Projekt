@@ -215,9 +215,10 @@ class _DashboardPageState extends State<DashboardPage> {
                 _buildMenuItem(1, Icons.local_cafe, 'Etikety'),
                 _buildMenuItem(2, Icons.qr_code, 'QR kódy'),
                 _buildMenuItem(3, Icons.people, 'Správa obsahu'),
+                _buildMenuItem(4, Icons.settings, 'Správa uživatel'),
                 const Spacer(),
                 const Divider(height: 1, color: Color(0xFFD0C4B3)),
-                _buildMenuItem(4, Icons.logout, 'Odhlásit se', isLogout: true),
+                _buildMenuItem(5, Icons.logout, 'Odhlásit se', isLogout: true),
               ],
             ),
           ),
@@ -230,6 +231,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 CoffeeListPage(username: widget.username, password: widget.password),
                 QRListPage(username: widget.username, password: widget.password),
                 VideosPage(username: widget.username, password: widget.password),
+                UsersPage(username: widget.username, password: widget.password),
               ],
             ),
           ),
@@ -1224,3 +1226,433 @@ class _VideosPageState extends State<VideosPage> {
   }
 }
 
+/* ---------------------- Users Page ---------------------- */
+class UsersPage extends StatefulWidget {
+  final String username;
+  final String password;
+  const UsersPage({super.key, required this.username, required this.password});
+
+  @override
+  State<UsersPage> createState() => _UsersPageState();
+}
+
+class _UsersPageState extends State<UsersPage> {
+  List<AppUser>? _users;
+  List<String> _availableRoles = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await Future.wait([
+      _loadUsers(),
+      _loadRoles(),
+    ]);
+  }
+
+  Future<void> _loadRoles() async {
+    try {
+      final roles = await client.admin.getRoles(widget.username, widget.password);
+      if (mounted) {
+        setState(() => _availableRoles = roles);
+      }
+    } catch (e) {
+      // Fallback to default roles
+      if (mounted) {
+        setState(() => _availableRoles = ['admin', 'editor', 'viewer']);
+      }
+    }
+  }
+
+  Future<void> _loadUsers() async {
+    setState(() => _loading = true);
+    try {
+      final users = await client.admin.getAllUsers(widget.username, widget.password);
+      if (mounted) {
+        setState(() {
+          _users = users;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Chyba: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  Future<void> _showAddUserDialog() async {
+    if (_availableRoles.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Načítání rolí...'), backgroundColor: Colors.orange),
+      );
+      return;
+    }
+
+    final usernameCtrl = TextEditingController();
+    final passwordCtrl = TextEditingController();
+    final emailCtrl = TextEditingController();
+    String role = _availableRoles.first;
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Přidat uživatele'),
+        content: SizedBox(
+          width: 400,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: usernameCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Uživatelské jméno',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: passwordCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Heslo',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: emailCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: role,
+                decoration: const InputDecoration(
+                  labelText: 'Role',
+                  border: OutlineInputBorder(),
+                ),
+                items: _availableRoles.map((r) => DropdownMenuItem(
+                  value: r,
+                  child: Text(r[0].toUpperCase() + r.substring(1)),
+                )).toList(),
+                onChanged: (val) => role = val ?? role,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('ZRUŠIT')),
+          ElevatedButton(
+            onPressed: () async {
+              if (usernameCtrl.text.isEmpty || passwordCtrl.text.isEmpty || emailCtrl.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Vyplňte všechna pole'), backgroundColor: Colors.red),
+                );
+                return;
+              }
+              Navigator.pop(ctx, true);
+            },
+            child: const Text('PŘIDAT'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      try {
+        await client.admin.createUser(
+          widget.username,
+          widget.password,
+          usernameCtrl.text.trim(),
+          passwordCtrl.text,
+          emailCtrl.text.trim(),
+          role,
+        );
+        _loadUsers();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Uživatel přidán'), backgroundColor: Color(0xFF8BC34A)),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Chyba: $e'), backgroundColor: Colors.red),
+          );
+        }
+      }
+    }
+
+    usernameCtrl.dispose();
+    passwordCtrl.dispose();
+    emailCtrl.dispose();
+  }
+
+  Future<void> _showEditUserDialog(AppUser user) async {
+    if (_availableRoles.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Načítání rolí...'), backgroundColor: Colors.orange),
+      );
+      return;
+    }
+
+    final emailCtrl = TextEditingController(text: user.email);
+    final passwordCtrl = TextEditingController();
+    String role = user.role;
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Upravit uživatele: ${user.username}'),
+        content: SizedBox(
+          width: 400,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: emailCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: passwordCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Nové heslo (volitelné)',
+                  border: OutlineInputBorder(),
+                  helperText: 'Nechte prázdné pro zachování stávajícího',
+                ),
+                obscureText: true,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: role,
+                decoration: const InputDecoration(
+                  labelText: 'Role',
+                  border: OutlineInputBorder(),
+                ),
+                items: _availableRoles.map((r) => DropdownMenuItem(
+                  value: r,
+                  child: Text(r[0].toUpperCase() + r.substring(1)),
+                )).toList(),
+                onChanged: (val) => role = val ?? role,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('ZRUŠIT')),
+          ElevatedButton(
+            onPressed: () {
+              if (emailCtrl.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Email nesmí být prázdný'), backgroundColor: Colors.red),
+                );
+                return;
+              }
+              Navigator.pop(ctx, true);
+            },
+            child: const Text('ULOŽIT'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      try {
+        await client.admin.updateUser(
+          widget.username,
+          widget.password,
+          user.id!,
+          emailCtrl.text.trim(),
+          role,
+          passwordCtrl.text.isNotEmpty ? passwordCtrl.text : null,
+        );
+        _loadUsers();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Uživatel upraven'), backgroundColor: Color(0xFF8BC34A)),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Chyba: $e'), backgroundColor: Colors.red),
+          );
+        }
+      }
+    }
+
+    emailCtrl.dispose();
+    passwordCtrl.dispose();
+  }
+
+  Future<void> _toggleUserActive(AppUser user) async {
+    try {
+      await client.admin.toggleUserActive(widget.username, widget.password, user.id!);
+      _loadUsers();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(user.isActive ? 'Uživatel deaktivován' : 'Uživatel aktivován'),
+            backgroundColor: const Color(0xFF8BC34A),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Chyba: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteUser(AppUser user) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Smazat uživatele'),
+        content: Text('Opravdu chcete smazat uživatele "${user.username}"?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('ZRUŠIT')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF5722), foregroundColor: Colors.white),
+            child: const Text('SMAZAT'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await client.admin.deleteUser(widget.username, widget.password, user.id!);
+        _loadUsers();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Uživatel smazán'), backgroundColor: Color(0xFF8BC34A)),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Chyba: $e'), backgroundColor: Colors.red),
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Správa uživatelů'),
+        backgroundColor: const Color(0xFFE8DFD3),
+        foregroundColor: Colors.black,
+        actions: [
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadUsers),
+        ],
+      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _users == null || _users!.isEmpty
+              ? const Center(child: Text('Žádní uživatelé'))
+              : ListView(
+                  padding: const EdgeInsets.all(24),
+                  children: [
+                    DataTable(
+                      columns: const [
+                        DataColumn(label: Text('Uživatelské jméno', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Email', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Role', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Stav', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Vytvořeno', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Poslední přihlášení', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Akce', style: TextStyle(fontWeight: FontWeight.bold))),
+                      ],
+                      rows: _users!.map((user) {
+                        return DataRow(
+                          cells: [
+                            DataCell(Text(user.username)),
+                            DataCell(Text(user.email)),
+                            DataCell(
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: user.role == 'admin' ? const Color(0xFFFF5722) : const Color(0xFF2196F3),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  user.role.toUpperCase(),
+                                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                            DataCell(
+                              GestureDetector(
+                                onTap: () => _toggleUserActive(user),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: user.isActive ? const Color(0xFF8BC34A) : Colors.grey,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    user.isActive ? 'AKTIVNÍ' : 'NEAKTIVNÍ',
+                                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            DataCell(Text(user.createdAt != null ? _formatDate(user.createdAt!) : '-')),
+                            DataCell(Text(user.lastLogin != null ? _formatDate(user.lastLogin!) : '-')),
+                            DataCell(
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit, size: 20),
+                                    onPressed: () => _showEditUserDialog(user),
+                                    tooltip: 'Upravit',
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                                    onPressed: () => _deleteUser(user),
+                                    tooltip: 'Smazat',
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showAddUserDialog,
+        icon: const Icon(Icons.add),
+        label: const Text('PŘIDAT UŽIVATELE'),
+        backgroundColor: const Color(0xFF8BC34A),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}.${date.month}.${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+  }
+}

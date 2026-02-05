@@ -5,8 +5,12 @@ admin:
   - assignQRCode:
   - getAllQRMappings:
   - deleteQRMapping:
+  - getRoles:
   - createUser:
   - getAllUsers:
+  - updateUser:
+  - deleteUser:
+  - toggleUserActive:
   - login:
   - uploadFileBase64:
   - getAllMedia:
