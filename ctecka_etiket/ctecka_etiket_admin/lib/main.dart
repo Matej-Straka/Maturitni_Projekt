@@ -8,8 +8,8 @@ import 'dart:io';
 import 'dart:convert';
 
 late final Client client;
-const serverUrl = String.fromEnvironment('SERVER_URL', defaultValue: 'http://34.122.70.47:8080/');
-const staticServerUrl = String.fromEnvironment('STATIC_SERVER_URL', defaultValue: 'http://34.122.70.47:8090');
+const serverUrl = String.fromEnvironment('SERVER_URL', defaultValue: 'https://ctecka-etiket.duckdns.org/');
+const staticServerUrl = String.fromEnvironment('STATIC_SERVER_URL', defaultValue: 'https://ctecka-etiket.duckdns.org');
 
 // Helper function to get full URL for media files
 String getMediaUrl(String url) {

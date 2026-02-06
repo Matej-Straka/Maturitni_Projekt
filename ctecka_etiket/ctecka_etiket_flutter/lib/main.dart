@@ -10,8 +10,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'theme/app_theme.dart';
 
 late Client client;
-String serverUrl = 'http://34.122.70.47:8080/';
-String staticServerUrl = 'http://34.122.70.47:8090/';
+String serverUrl = 'https://ctecka-etiket.duckdns.org/';
+String staticServerUrl = 'https://ctecka-etiket.duckdns.org/';
 
 // Helper function to get full URL for media files
 String getMediaUrl(String url) {
@@ -27,7 +27,7 @@ String getMediaUrl(String url) {
 // Load server settings from SharedPreferences
 Future<void> loadServerSettings() async {
   final prefs = await SharedPreferences.getInstance();
-  serverUrl = prefs.getString('serverUrl') ?? 'http://34.122.70.47:8080/';
+  serverUrl = prefs.getString('serverUrl') ?? 'https://ctecka-etiket.duckdns.org/';
   staticServerUrl =
       prefs.getString('staticServerUrl') ?? 'http://34.122.70.47:8090/';
 }

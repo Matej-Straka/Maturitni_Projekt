@@ -1,0 +1,24 @@
+# Caddyfile pro ctecka_etiket projekt
+# Nahraď 'moje-app.duckdns.org' svojí doménou z DuckDNS
+
+moje-app.duckdns.org {
+    # Statické soubory (obrázky, videa)
+    handle /uploads/* {
+        reverse_proxy localhost:8090
+    }
+    
+    # API endpointy
+    handle {
+        reverse_proxy localhost:8080
+    }
+}
+
+# Nebo pokud chceš oddělené subdomény:
+# 
+# api.moje-app.duckdns.org {
+#     reverse_proxy localhost:8080
+# }
+#
+# static.moje-app.duckdns.org {
+#     reverse_proxy localhost:8090
+# }
