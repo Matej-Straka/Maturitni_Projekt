@@ -10,12 +10,6 @@ class AdminEndpoint extends Endpoint {
   // Simple auth check - in production use proper JWT/session management
   Future<bool> _isAdmin(Session session, String username, String password) async {
     try {
-      // Rate limiting check
-      if (!await _checkRateLimit(session, username)) {
-        session.log('Rate limit exceeded for user: $username', level: LogLevel.warning);
-        return false;
-      }
-
       final user = await AppUser.db.findFirstRow(
         session,
         where: (t) => t.username.equals(username) & t.isActive.equals(true),
@@ -55,12 +49,6 @@ class AdminEndpoint extends Endpoint {
   // Check if user has required role (admin, editor, or viewer)
   Future<bool> _hasRole(Session session, String username, String password, List<String> allowedRoles) async {
     try {
-      // Rate limiting check
-      if (!await _checkRateLimit(session, username)) {
-        session.log('Rate limit exceeded for user: $username', level: LogLevel.warning);
-        return false;
-      }
-
       final user = await AppUser.db.findFirstRow(
         session,
         where: (t) => t.username.equals(username) & t.isActive.equals(true),
