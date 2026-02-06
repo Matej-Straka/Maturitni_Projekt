@@ -29,7 +29,7 @@ Future<void> loadServerSettings() async {
   final prefs = await SharedPreferences.getInstance();
   serverUrl = prefs.getString('serverUrl') ?? 'https://ctecka-etiket.duckdns.org/';
   staticServerUrl =
-      prefs.getString('staticServerUrl') ?? 'http://34.122.70.47:8090/';
+      prefs.getString('staticServerUrl') ?? 'http://ctecka-etiket.duckdns.org/uploads/';
 }
 
 // Save server settings to SharedPreferences

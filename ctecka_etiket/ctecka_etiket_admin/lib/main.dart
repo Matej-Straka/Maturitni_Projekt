@@ -9,7 +9,7 @@ import 'dart:convert';
 
 late final Client client;
 const serverUrl = String.fromEnvironment('SERVER_URL', defaultValue: 'https://ctecka-etiket.duckdns.org/');
-const staticServerUrl = String.fromEnvironment('STATIC_SERVER_URL', defaultValue: 'https://ctecka-etiket.duckdns.org');
+const staticServerUrl = String.fromEnvironment('STATIC_SERVER_URL', defaultValue: 'https://ctecka-etiket.duckdns.org/');
 
 // Helper function to get full URL for media files
 String getMediaUrl(String url) {
@@ -38,8 +38,8 @@ Future<String?> uploadFile(File file, String type, String username, String passw
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  const serverUrl = String.fromEnvironment('SERVER_URL', defaultValue: 'http://34.122.70.47:8080/');
-  client = Client(serverUrl)..connectivityMonitor = FlutterConnectivityMonitor();
+  final resolvedServerUrl = serverUrl.endsWith('/') ? serverUrl : '$serverUrl/';
+  client = Client(resolvedServerUrl)..connectivityMonitor = FlutterConnectivityMonitor();
   runApp(const AdminApp());
 }
 
@@ -530,6 +530,14 @@ class _CoffeeListPageState extends State<CoffeeListPage> {
     final videoCtrl = TextEditingController(text: coffee?.videoUrl ?? '');
     final imageCtrl = TextEditingController(text: coffee?.imageUrl ?? '');
 
+    bool isValidMediaUrl(String value) {
+      final trimmed = value.trim();
+      if (trimmed.isEmpty) return true;
+      return trimmed.startsWith('http://') ||
+          trimmed.startsWith('https://') ||
+          trimmed.startsWith('/uploads/');
+    }
+
     await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -607,6 +615,30 @@ class _CoffeeListPageState extends State<CoffeeListPage> {
           ),
           ElevatedButton(
             onPressed: () async {
+              if (!isValidMediaUrl(videoCtrl.text)) {
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    const SnackBar(
+                      content: Text('Neplatná URL videa. Vyber video z galerie nebo vlož http(s) URL.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+                return;
+              }
+
+              if (!isValidMediaUrl(imageCtrl.text)) {
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    const SnackBar(
+                      content: Text('Neplatná URL obrázku. Vyber obrázek z galerie nebo vlož http(s) URL.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+                return;
+              }
+
               final newCoffee = Coffee(
                 id: coffee?.id,
                 name: nameCtrl.text,
