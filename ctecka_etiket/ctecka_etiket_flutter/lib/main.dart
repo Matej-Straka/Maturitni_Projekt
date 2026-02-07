@@ -18,10 +18,15 @@ String getMediaUrl(String url) {
   if (url.startsWith('http')) {
     return url;
   }
-  // Files are served from static server on port 8090
-  // Remove /uploads/ prefix since static server serves directly from web/uploads folder
-  final cleanUrl = url.startsWith('/uploads/') ? url.substring(8) : url;
-  return '$staticServerUrl/$cleanUrl';
+  // Keep /uploads/ prefix so Caddy routes to static server
+  final cleanUrl = url;
+  final base = staticServerUrl.endsWith('/')
+      ? staticServerUrl.substring(0, staticServerUrl.length - 1)
+      : staticServerUrl;
+  final path = cleanUrl.startsWith('/') ? cleanUrl.substring(1) : cleanUrl;
+  final baseUri = Uri.parse('$base/');
+  final uri = baseUri.resolveUri(Uri(path: path));
+  return uri.toString();
 }
 
 // Load server settings from SharedPreferences
@@ -29,16 +34,35 @@ Future<void> loadServerSettings() async {
   final prefs = await SharedPreferences.getInstance();
   serverUrl = prefs.getString('serverUrl') ?? 'https://ctecka-etiket.duckdns.org/';
   staticServerUrl =
-      prefs.getString('staticServerUrl') ?? 'http://ctecka-etiket.duckdns.org/uploads/';
+      prefs.getString('staticServerUrl') ?? 'https://ctecka-etiket.duckdns.org/';
+
+  serverUrl = _normalizeBaseUrl(serverUrl);
+  staticServerUrl = _normalizeBaseUrl(staticServerUrl);
+}
+
+String _normalizeBaseUrl(String url) {
+  var normalized = url.trim();
+  if (normalized.startsWith('http://')) {
+    normalized = normalized.replaceFirst('http://', 'https://');
+  }
+  if (normalized.endsWith('/uploads') || normalized.endsWith('/uploads/')) {
+    normalized = normalized.replaceFirst(RegExp(r'/uploads/?$'), '/');
+  }
+  if (!normalized.endsWith('/')) {
+    normalized = '$normalized/';
+  }
+  return normalized;
 }
 
 // Save server settings to SharedPreferences
 Future<void> saveServerSettings(String apiUrl, String staticUrl) async {
   final prefs = await SharedPreferences.getInstance();
-  await prefs.setString('serverUrl', apiUrl);
-  await prefs.setString('staticServerUrl', staticUrl);
-  serverUrl = apiUrl;
-  staticServerUrl = staticUrl;
+  final normalizedApi = _normalizeBaseUrl(apiUrl);
+  final normalizedStatic = _normalizeBaseUrl(staticUrl);
+  await prefs.setString('serverUrl', normalizedApi);
+  await prefs.setString('staticServerUrl', normalizedStatic);
+  serverUrl = normalizedApi;
+  staticServerUrl = normalizedStatic;
 }
 
 void main() async {

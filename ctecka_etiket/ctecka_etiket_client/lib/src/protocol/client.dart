@@ -300,6 +300,28 @@ class EndpointAdmin extends _i1.EndpointRef {
         },
       );
 
+  /// Register uploaded media (used with static server multipart upload)
+  _i2.Future<_i6.MediaFile?> registerMedia(
+    String username,
+    String password,
+    String url,
+    String fileName,
+    String mimeType,
+    int fileSize,
+  ) =>
+      caller.callServerEndpoint<_i6.MediaFile?>(
+        'admin',
+        'registerMedia',
+        {
+          'username': username,
+          'password': password,
+          'url': url,
+          'fileName': fileName,
+          'mimeType': mimeType,
+          'fileSize': fileSize,
+        },
+      );
+
   /// Get all uploaded media files
   _i2.Future<List<_i6.MediaFile>> getAllMedia(
     String username,

@@ -4,12 +4,14 @@ import 'admin_theme.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
 import 'dart:io';
 import 'dart:convert';
 
 late final Client client;
 const serverUrl = String.fromEnvironment('SERVER_URL', defaultValue: 'https://ctecka-etiket.duckdns.org/');
 const staticServerUrl = String.fromEnvironment('STATIC_SERVER_URL', defaultValue: 'https://ctecka-etiket.duckdns.org/');
+const uploadToken = String.fromEnvironment('UPLOAD_TOKEN', defaultValue: '');
 
 // Helper function to get full URL for media files
 String getMediaUrl(String url) {
@@ -25,10 +27,34 @@ String getMediaUrl(String url) {
 Future<String?> uploadFile(File file, String type, String username, String password) async {
   try {
     final fileName = file.path.split('/').last;
-    final fileData = await file.readAsBytes();
-    final fileDataBase64 = base64.encode(fileData);
-    
-    final url = await client.admin.uploadFileBase64(username, password, fileName, fileDataBase64, type);
+    final base = staticServerUrl.endsWith('/') ? staticServerUrl : '$staticServerUrl/';
+    final uploadUri = Uri.parse('${base}upload');
+
+    final request = http.MultipartRequest('POST', uploadUri);
+    if (uploadToken.isNotEmpty) {
+      request.headers['x-upload-token'] = uploadToken;
+    }
+    request.files.add(await http.MultipartFile.fromPath('file', file.path, filename: fileName));
+
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+
+    if (response.statusCode != 200) {
+      print('Upload error: ${response.statusCode} $responseBody');
+      return null;
+    }
+
+    final data = jsonDecode(responseBody) as Map<String, dynamic>;
+    final url = data['url'] as String?;
+    final savedFileName = data['fileName'] as String? ?? fileName;
+    final mimeType = data['mimeType'] as String? ?? type;
+    final fileSize = (data['fileSize'] as num?)?.toInt() ?? 0;
+
+    if (url == null) {
+      return null;
+    }
+
+    await client.admin.registerMedia(username, password, url, savedFileName, mimeType, fileSize);
     return url;
   } catch (e) {
     print('Upload error: $e');

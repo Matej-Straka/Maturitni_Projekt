@@ -47,7 +47,7 @@ redis:
 maxRequestSize: 524288000 # 500MB for large video uploads (was 512KB)
 
 sessionLogs:
-  persistentEnabled: true
+  persistentEnabled: false
   consoleEnabled: true
   consoleLogFormat: text # Defaults to "json", options are "text" or "json"
 

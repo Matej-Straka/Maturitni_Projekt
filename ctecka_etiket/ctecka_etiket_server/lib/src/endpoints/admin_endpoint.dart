@@ -554,6 +554,38 @@ class AdminEndpoint extends Endpoint {
     }
   }
 
+  /// Register uploaded media (used with static server multipart upload)
+  Future<MediaFile?> registerMedia(
+    Session session,
+    String username,
+    String password,
+    String url,
+    String fileName,
+    String mimeType,
+    int fileSize,
+  ) async {
+    if (!await _hasRole(session, username, password, ['admin', 'editor'])) {
+      throw Exception('Unauthorized');
+    }
+
+    try {
+      final mediaFile = MediaFile(
+        url: url,
+        fileName: fileName,
+        fileType: mimeType.startsWith('image') ? 'image' : 'video',
+        mimeType: mimeType,
+        fileSize: fileSize,
+        uploadedAt: DateTime.now(),
+        uploadedBy: username,
+      );
+      await MediaFile.db.insertRow(session, mediaFile);
+      return mediaFile;
+    } catch (e) {
+      session.log('Error registering media: $e', level: LogLevel.error);
+      return null;
+    }
+  }
+
   /// Get all uploaded media files
   Future<List<MediaFile>> getAllMedia(
     Session session,
