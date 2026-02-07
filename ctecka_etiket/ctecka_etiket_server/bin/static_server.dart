@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
@@ -23,7 +25,8 @@ void main() async {
       return Response(400, body: 'Expected multipart/form-data');
     }
 
-    final boundary = HeaderValue.parse(contentType).parameters['boundary'];
+    final mediaType = MediaType.parse(contentType);
+    final boundary = mediaType.parameters['boundary'];
     if (boundary == null || boundary.isEmpty) {
       return Response(400, body: 'Missing multipart boundary');
     }
