@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
-import 'package:shelf_multipart/shelf_multipart.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_static/shelf_static.dart';
 
@@ -19,8 +18,14 @@ void main() async {
       }
     }
 
-    if (!request.isMultipart) {
+    final contentType = request.headers['content-type'];
+    if (contentType == null || !contentType.toLowerCase().startsWith('multipart/form-data')) {
       return Response(400, body: 'Expected multipart/form-data');
+    }
+
+    final boundary = HeaderValue.parse(contentType).parameters['boundary'];
+    if (boundary == null || boundary.isEmpty) {
+      return Response(400, body: 'Missing multipart boundary');
     }
 
     final uploadsDir = await Directory('web/uploads').create(recursive: true);
@@ -30,19 +35,32 @@ void main() async {
     int fileSize = 0;
     List<int>? fileBytes;
 
-    await for (final formData in request.multipartFormData) {
-      if (formData.name != 'file') {
+    final transformer = MimeMultipartTransformer(boundary);
+    await for (final part in transformer.bind(request.read())) {
+      final disposition = part.headers['content-disposition'];
+      if (disposition == null) {
         continue;
       }
 
-      fileName = formData.filename ?? 'upload.bin';
-      mimeType = formData.contentType?.mimeType ?? 'application/octet-stream';
-      fileBytes = await formData.part.readBytes();
-      fileSize = fileBytes.length;
+      final dispositionHeader = HeaderValue.parse(disposition, preserveBackslash: true);
+      final name = dispositionHeader.parameters['name'];
+      if (name != 'file') {
+        continue;
+      }
+
+      fileName = dispositionHeader.parameters['filename'] ?? 'upload.bin';
+      mimeType = part.headers['content-type'] ?? 'application/octet-stream';
+
+      final bytes = <int>[];
+      await for (final chunk in part) {
+        bytes.addAll(chunk);
+      }
+      fileBytes = bytes;
+      fileSize = bytes.length;
       break;
     }
 
-    if (fileBytes == null || fileName == null) {
+    if (fileBytes == null || fileName == null || fileBytes.isEmpty) {
       return Response(400, body: 'Missing file');
     }
 

@@ -52,7 +52,7 @@ maxRequestSize: 524288000 # 500MB for large video uploads
 
 sessionLogs:
   consoleEnabled: true
-  persistentEnabled: false
+  persistentEnabled: true
 # consoleLogFormat: json # Defaults to "json", options are "text" or "json"
 
 # futureCallExecutionEnabled: true # Defaults to true
