@@ -7,7 +7,6 @@
 // ignore_for_file: public_member_api_docs
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
-// ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
@@ -100,7 +99,6 @@ abstract class AppUser
   @override
   Map<String, dynamic> toJson() {
     return {
-      '__className__': 'AppUser',
       if (id != null) 'id': id,
       'username': username,
       'passwordHash': passwordHash,
@@ -115,7 +113,6 @@ abstract class AppUser
   @override
   Map<String, dynamic> toJsonForProtocol() {
     return {
-      '__className__': 'AppUser',
       if (id != null) 'id': id,
       'username': username,
       'passwordHash': passwordHash,
@@ -170,15 +167,15 @@ class _AppUserImpl extends AppUser {
     DateTime? createdAt,
     DateTime? lastLogin,
   }) : super._(
-         id: id,
-         username: username,
-         passwordHash: passwordHash,
-         email: email,
-         role: role,
-         isActive: isActive,
-         createdAt: createdAt,
-         lastLogin: lastLogin,
-       );
+          id: id,
+          username: username,
+          passwordHash: passwordHash,
+          email: email,
+          role: role,
+          isActive: isActive,
+          createdAt: createdAt,
+          lastLogin: lastLogin,
+        );
 
   /// Returns a shallow copy of this [AppUser]
   /// with some or all fields replaced by the given arguments.
@@ -207,50 +204,8 @@ class _AppUserImpl extends AppUser {
   }
 }
 
-class AppUserUpdateTable extends _i1.UpdateTable<AppUserTable> {
-  AppUserUpdateTable(super.table);
-
-  _i1.ColumnValue<String, String> username(String value) => _i1.ColumnValue(
-    table.username,
-    value,
-  );
-
-  _i1.ColumnValue<String, String> passwordHash(String value) => _i1.ColumnValue(
-    table.passwordHash,
-    value,
-  );
-
-  _i1.ColumnValue<String, String> email(String value) => _i1.ColumnValue(
-    table.email,
-    value,
-  );
-
-  _i1.ColumnValue<String, String> role(String value) => _i1.ColumnValue(
-    table.role,
-    value,
-  );
-
-  _i1.ColumnValue<bool, bool> isActive(bool value) => _i1.ColumnValue(
-    table.isActive,
-    value,
-  );
-
-  _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime? value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
-
-  _i1.ColumnValue<DateTime, DateTime> lastLogin(DateTime? value) =>
-      _i1.ColumnValue(
-        table.lastLogin,
-        value,
-      );
-}
-
 class AppUserTable extends _i1.Table<int?> {
   AppUserTable({super.tableRelation}) : super(tableName: 'app_user') {
-    updateTable = AppUserUpdateTable(this);
     username = _i1.ColumnString(
       'username',
       this,
@@ -281,8 +236,6 @@ class AppUserTable extends _i1.Table<int?> {
     );
   }
 
-  late final AppUserUpdateTable updateTable;
-
   /// Username for login
   late final _i1.ColumnString username;
 
@@ -306,15 +259,15 @@ class AppUserTable extends _i1.Table<int?> {
 
   @override
   List<_i1.Column> get columns => [
-    id,
-    username,
-    passwordHash,
-    email,
-    role,
-    isActive,
-    createdAt,
-    lastLogin,
-  ];
+        id,
+        username,
+        passwordHash,
+        email,
+        role,
+        isActive,
+        createdAt,
+        lastLogin,
+      ];
 }
 
 class AppUserInclude extends _i1.IncludeObject {
@@ -502,46 +455,6 @@ class AppUserRepository {
     return session.db.updateRow<AppUser>(
       row,
       columns: columns?.call(AppUser.t),
-      transaction: transaction,
-    );
-  }
-
-  /// Updates a single [AppUser] by its [id] with the specified [columnValues].
-  /// Returns the updated row or null if no row with the given id exists.
-  Future<AppUser?> updateById(
-    _i1.Session session,
-    int id, {
-    required _i1.ColumnValueListBuilder<AppUserUpdateTable> columnValues,
-    _i1.Transaction? transaction,
-  }) async {
-    return session.db.updateById<AppUser>(
-      id,
-      columnValues: columnValues(AppUser.t.updateTable),
-      transaction: transaction,
-    );
-  }
-
-  /// Updates all [AppUser]s matching the [where] expression with the specified [columnValues].
-  /// Returns the list of updated rows.
-  Future<List<AppUser>> updateWhere(
-    _i1.Session session, {
-    required _i1.ColumnValueListBuilder<AppUserUpdateTable> columnValues,
-    required _i1.WhereExpressionBuilder<AppUserTable> where,
-    int? limit,
-    int? offset,
-    _i1.OrderByBuilder<AppUserTable>? orderBy,
-    _i1.OrderByListBuilder<AppUserTable>? orderByList,
-    bool orderDescending = false,
-    _i1.Transaction? transaction,
-  }) async {
-    return session.db.updateWhere<AppUser>(
-      columnValues: columnValues(AppUser.t.updateTable),
-      where: where(AppUser.t),
-      limit: limit,
-      offset: offset,
-      orderBy: orderBy?.call(AppUser.t),
-      orderByList: orderByList?.call(AppUser.t),
-      orderDescending: orderDescending,
       transaction: transaction,
     );
   }

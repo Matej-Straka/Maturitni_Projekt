@@ -7,7 +7,6 @@
 // ignore_for_file: public_member_api_docs
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
-// ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
@@ -100,7 +99,7 @@ class Protocol extends _i1.SerializationManagerServer {
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
               definition: 'id',
-            ),
+            )
           ],
           type: 'btree',
           isUnique: true,
@@ -113,7 +112,7 @@ class Protocol extends _i1.SerializationManagerServer {
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
               definition: 'username',
-            ),
+            )
           ],
           type: 'btree',
           isUnique: true,
@@ -126,7 +125,7 @@ class Protocol extends _i1.SerializationManagerServer {
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
               definition: 'email',
-            ),
+            )
           ],
           type: 'btree',
           isUnique: false,
@@ -206,7 +205,7 @@ class Protocol extends _i1.SerializationManagerServer {
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
               definition: 'id',
-            ),
+            )
           ],
           type: 'btree',
           isUnique: true,
@@ -219,7 +218,7 @@ class Protocol extends _i1.SerializationManagerServer {
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
               definition: 'name',
-            ),
+            )
           ],
           type: 'btree',
           isUnique: false,
@@ -294,12 +293,12 @@ class Protocol extends _i1.SerializationManagerServer {
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
               definition: 'id',
-            ),
+            )
           ],
           type: 'btree',
           isUnique: true,
           isPrimary: true,
-        ),
+        )
       ],
       managed: true,
     ),
@@ -350,7 +349,7 @@ class Protocol extends _i1.SerializationManagerServer {
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
               definition: 'id',
-            ),
+            )
           ],
           type: 'btree',
           isUnique: true,
@@ -363,7 +362,7 @@ class Protocol extends _i1.SerializationManagerServer {
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
               definition: 'qrCode',
-            ),
+            )
           ],
           type: 'btree',
           isUnique: true,
@@ -375,33 +374,12 @@ class Protocol extends _i1.SerializationManagerServer {
     ..._i2.Protocol.targetTableDefinitions,
   ];
 
-  static String? getClassNameFromObjectJson(dynamic data) {
-    if (data is! Map) return null;
-    final className = data['__className__'] as String?;
-    return className;
-  }
-
   @override
   T deserialize<T>(
     dynamic data, [
     Type? t,
   ]) {
     t ??= T;
-
-    final dataClassName = getClassNameFromObjectJson(data);
-    if (dataClassName != null && dataClassName != getClassNameForType(t)) {
-      try {
-        return deserializeByClassName({
-          'className': dataClassName,
-          'data': data,
-        });
-      } on FormatException catch (_) {
-        // If the className is not recognized (e.g., older client receiving
-        // data with a new subtype), fall back to deserializing without the
-        // className, using the expected type T.
-      }
-    }
-
     if (t == _i3.AppUser) {
       return _i3.AppUser.fromJson(data) as T;
     }
@@ -434,9 +412,8 @@ class Protocol extends _i1.SerializationManagerServer {
     }
     if (t == List<_i8.QRCodeMapping>) {
       return (data as List)
-              .map((e) => deserialize<_i8.QRCodeMapping>(e))
-              .toList()
-          as T;
+          .map((e) => deserialize<_i8.QRCodeMapping>(e))
+          .toList() as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
@@ -462,40 +439,24 @@ class Protocol extends _i1.SerializationManagerServer {
     return super.deserialize<T>(data, t);
   }
 
-  static String? getClassNameForType(Type type) {
-    return switch (type) {
-      _i3.AppUser => 'AppUser',
-      _i4.Coffee => 'Coffee',
-      _i5.Greeting => 'Greeting',
-      _i6.MediaFile => 'MediaFile',
-      _i7.QRCodeMapping => 'QRCodeMapping',
-      _ => null,
-    };
-  }
-
   @override
   String? getClassNameForObject(Object? data) {
     String? className = super.getClassNameForObject(data);
     if (className != null) return className;
-
-    if (data is Map<String, dynamic> && data['__className__'] is String) {
-      return (data['__className__'] as String).replaceFirst(
-        'ctecka_etiket.',
-        '',
-      );
+    if (data is _i3.AppUser) {
+      return 'AppUser';
     }
-
-    switch (data) {
-      case _i3.AppUser():
-        return 'AppUser';
-      case _i4.Coffee():
-        return 'Coffee';
-      case _i5.Greeting():
-        return 'Greeting';
-      case _i6.MediaFile():
-        return 'MediaFile';
-      case _i7.QRCodeMapping():
-        return 'QRCodeMapping';
+    if (data is _i4.Coffee) {
+      return 'Coffee';
+    }
+    if (data is _i5.Greeting) {
+      return 'Greeting';
+    }
+    if (data is _i6.MediaFile) {
+      return 'MediaFile';
+    }
+    if (data is _i7.QRCodeMapping) {
+      return 'QRCodeMapping';
     }
     className = _i2.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -559,19 +520,4 @@ class Protocol extends _i1.SerializationManagerServer {
 
   @override
   String getModuleName() => 'ctecka_etiket';
-
-  /// Maps any `Record`s known to this [Protocol] to their JSON representation
-  ///
-  /// Throws in case the record type is not known.
-  ///
-  /// This method will return `null` (only) for `null` inputs.
-  Map<String, dynamic>? mapRecordToJson(Record? record) {
-    if (record == null) {
-      return null;
-    }
-    try {
-      return _i2.Protocol().mapRecordToJson(record);
-    } catch (_) {}
-    throw Exception('Unsupported record type ${record.runtimeType}');
-  }
 }
