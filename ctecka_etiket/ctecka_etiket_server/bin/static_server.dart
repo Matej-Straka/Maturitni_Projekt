@@ -34,6 +34,7 @@ void main() async {
     final uploadsDir = await Directory('web/uploads').create(recursive: true);
 
     String? fileName;
+    String? uniqueFileName;
     String? mimeType;
     int fileSize = 0;
     List<int>? fileBytes;
@@ -59,7 +60,7 @@ void main() async {
           .replaceAll(RegExp(r'\s+'), ' ')
           .trim();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final uniqueFileName = '${timestamp}_$safeFileName';
+      uniqueFileName = '${timestamp}_$safeFileName';
       final filePath = '${uploadsDir.path}/$uniqueFileName';
 
       final file = File(filePath);
