@@ -54,29 +54,38 @@ void main() async {
       fileName = dispositionHeader.parameters['filename'] ?? 'upload.bin';
       mimeType = part.headers['content-type'] ?? 'application/octet-stream';
 
-      final bytes = <int>[];
-      await for (final chunk in part) {
-        bytes.addAll(chunk);
+      final safeFileName = fileName
+          .replaceAll(RegExp(r'[\\/]+'), '_')
+          .replaceAll(RegExp(r'\s+'), ' ')
+          .trim();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final uniqueFileName = '${timestamp}_$safeFileName';
+      final filePath = '${uploadsDir.path}/$uniqueFileName';
+
+      final file = File(filePath);
+      final sink = file.openWrite();
+      
+      try {
+        await for (final chunk in part) {
+          sink.add(chunk);
+          fileSize += chunk.length;
+        }
+        await sink.flush();
+        await sink.close();
+        fileBytes = [1]; // dummy to indicate success
+      } catch (e) {
+        await sink.close();
+        if (await file.exists()) {
+          await file.delete();
+        }
+        rethrow;
       }
-      fileBytes = bytes;
-      fileSize = bytes.length;
       break;
     }
 
-    if (fileBytes == null || fileName == null || fileBytes.isEmpty) {
+    if (fileBytes == null || fileName == null || fileSize == 0) {
       return Response(400, body: 'Missing file');
     }
-
-    final safeFileName = fileName
-        .replaceAll(RegExp(r'[\\/]+'), '_')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final uniqueFileName = '${timestamp}_$safeFileName';
-    final filePath = '${uploadsDir.path}/$uniqueFileName';
-
-    final file = File(filePath);
-    await file.writeAsBytes(fileBytes, flush: true);
 
     final response = {
       'url': '/uploads/$uniqueFileName',
