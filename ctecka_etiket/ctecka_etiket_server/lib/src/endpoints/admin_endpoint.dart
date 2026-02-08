@@ -568,22 +568,17 @@ class AdminEndpoint extends Endpoint {
       throw Exception('Unauthorized');
     }
 
-    try {
-      final mediaFile = MediaFile(
-        url: url,
-        fileName: fileName,
-        fileType: mimeType.startsWith('image') ? 'image' : 'video',
-        mimeType: mimeType,
-        fileSize: fileSize,
-        uploadedAt: DateTime.now(),
-        uploadedBy: username,
-      );
-      await MediaFile.db.insertRow(session, mediaFile);
-      return mediaFile;
-    } catch (e) {
-      session.log('Error registering media: $e', level: LogLevel.error);
-      return null;
-    }
+    final mediaFile = MediaFile(
+      url: url,
+      fileName: fileName,
+      fileType: mimeType.startsWith('image') ? 'image' : 'video',
+      mimeType: mimeType,
+      fileSize: fileSize,
+      uploadedAt: DateTime.now(),
+      uploadedBy: username,
+    );
+    await MediaFile.db.insertRow(session, mediaFile);
+    return mediaFile;
   }
 
   /// Get all uploaded media files
