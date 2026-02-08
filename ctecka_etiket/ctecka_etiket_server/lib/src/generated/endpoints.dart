@@ -7,6 +7,7 @@
 // ignore_for_file: public_member_api_docs
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
+// ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
@@ -94,21 +95,21 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).createCoffee(
-            session,
-            params['username'],
-            params['password'],
-            params['name'],
-            params['description'],
-            params['composition'],
-            params['moreInfo'],
-            params['videoUrl'],
-            params['imageUrl'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['admin'] as _i2.AdminEndpoint).createCoffee(
+                session,
+                params['username'],
+                params['password'],
+                params['name'],
+                params['description'],
+                params['composition'],
+                params['moreInfo'],
+                params['videoUrl'],
+                params['imageUrl'],
+              ),
         ),
         'updateCoffee': _i1.MethodConnector(
           name: 'updateCoffee',
@@ -159,22 +160,22 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).updateCoffee(
-            session,
-            params['username'],
-            params['password'],
-            params['coffeeId'],
-            params['name'],
-            params['description'],
-            params['composition'],
-            params['moreInfo'],
-            params['videoUrl'],
-            params['imageUrl'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['admin'] as _i2.AdminEndpoint).updateCoffee(
+                session,
+                params['username'],
+                params['password'],
+                params['coffeeId'],
+                params['name'],
+                params['description'],
+                params['composition'],
+                params['moreInfo'],
+                params['videoUrl'],
+                params['imageUrl'],
+              ),
         ),
         'deleteCoffee': _i1.MethodConnector(
           name: 'deleteCoffee',
@@ -195,16 +196,16 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).deleteCoffee(
-            session,
-            params['username'],
-            params['password'],
-            params['coffeeId'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['admin'] as _i2.AdminEndpoint).deleteCoffee(
+                session,
+                params['username'],
+                params['password'],
+                params['coffeeId'],
+              ),
         ),
         'assignQRCode': _i1.MethodConnector(
           name: 'assignQRCode',
@@ -230,17 +231,17 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).assignQRCode(
-            session,
-            params['username'],
-            params['password'],
-            params['qrCode'],
-            params['coffeeId'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['admin'] as _i2.AdminEndpoint).assignQRCode(
+                session,
+                params['username'],
+                params['password'],
+                params['qrCode'],
+                params['coffeeId'],
+              ),
         ),
         'getAllQRMappings': _i1.MethodConnector(
           name: 'getAllQRMappings',
@@ -256,15 +257,16 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).getAllQRMappings(
-            session,
-            params['username'],
-            params['password'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['admin'] as _i2.AdminEndpoint).getAllQRMappings(
+                    session,
+                    params['username'],
+                    params['password'],
+                  ),
         ),
         'deleteQRMapping': _i1.MethodConnector(
           name: 'deleteQRMapping',
@@ -285,16 +287,17 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).deleteQRMapping(
-            session,
-            params['username'],
-            params['password'],
-            params['mappingId'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['admin'] as _i2.AdminEndpoint).deleteQRMapping(
+                    session,
+                    params['username'],
+                    params['password'],
+                    params['mappingId'],
+                  ),
         ),
         'getRoles': _i1.MethodConnector(
           name: 'getRoles',
@@ -310,15 +313,15 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).getRoles(
-            session,
-            params['username'],
-            params['password'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['admin'] as _i2.AdminEndpoint).getRoles(
+                session,
+                params['username'],
+                params['password'],
+              ),
         ),
         'getCurrentUserRole': _i1.MethodConnector(
           name: 'getCurrentUserRole',
@@ -334,15 +337,16 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).getCurrentUserRole(
-            session,
-            params['username'],
-            params['password'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['admin'] as _i2.AdminEndpoint).getCurrentUserRole(
+                    session,
+                    params['username'],
+                    params['password'],
+                  ),
         ),
         'createUser': _i1.MethodConnector(
           name: 'createUser',
@@ -378,19 +382,19 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).createUser(
-            session,
-            params['adminUsername'],
-            params['adminPassword'],
-            params['newUsername'],
-            params['newPassword'],
-            params['email'],
-            params['role'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['admin'] as _i2.AdminEndpoint).createUser(
+                session,
+                params['adminUsername'],
+                params['adminPassword'],
+                params['newUsername'],
+                params['newPassword'],
+                params['email'],
+                params['role'],
+              ),
         ),
         'getAllUsers': _i1.MethodConnector(
           name: 'getAllUsers',
@@ -406,15 +410,15 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).getAllUsers(
-            session,
-            params['username'],
-            params['password'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['admin'] as _i2.AdminEndpoint).getAllUsers(
+                session,
+                params['username'],
+                params['password'],
+              ),
         ),
         'updateUser': _i1.MethodConnector(
           name: 'updateUser',
@@ -450,19 +454,19 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: true,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).updateUser(
-            session,
-            params['adminUsername'],
-            params['adminPassword'],
-            params['userId'],
-            params['email'],
-            params['role'],
-            params['newPassword'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['admin'] as _i2.AdminEndpoint).updateUser(
+                session,
+                params['adminUsername'],
+                params['adminPassword'],
+                params['userId'],
+                params['email'],
+                params['role'],
+                params['newPassword'],
+              ),
         ),
         'deleteUser': _i1.MethodConnector(
           name: 'deleteUser',
@@ -483,16 +487,16 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).deleteUser(
-            session,
-            params['adminUsername'],
-            params['adminPassword'],
-            params['userId'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['admin'] as _i2.AdminEndpoint).deleteUser(
+                session,
+                params['adminUsername'],
+                params['adminPassword'],
+                params['userId'],
+              ),
         ),
         'toggleUserActive': _i1.MethodConnector(
           name: 'toggleUserActive',
@@ -513,16 +517,17 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).toggleUserActive(
-            session,
-            params['adminUsername'],
-            params['adminPassword'],
-            params['userId'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['admin'] as _i2.AdminEndpoint).toggleUserActive(
+                    session,
+                    params['adminUsername'],
+                    params['adminPassword'],
+                    params['userId'],
+                  ),
         ),
         'login': _i1.MethodConnector(
           name: 'login',
@@ -538,15 +543,15 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).login(
-            session,
-            params['username'],
-            params['password'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['admin'] as _i2.AdminEndpoint).login(
+                session,
+                params['username'],
+                params['password'],
+              ),
         ),
         'uploadFileBase64': _i1.MethodConnector(
           name: 'uploadFileBase64',
@@ -577,18 +582,68 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).uploadFileBase64(
-            session,
-            params['username'],
-            params['password'],
-            params['fileName'],
-            params['fileDataBase64'],
-            params['fileType'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['admin'] as _i2.AdminEndpoint).uploadFileBase64(
+                    session,
+                    params['username'],
+                    params['password'],
+                    params['fileName'],
+                    params['fileDataBase64'],
+                    params['fileType'],
+                  ),
+        ),
+        'registerMedia': _i1.MethodConnector(
+          name: 'registerMedia',
+          params: {
+            'username': _i1.ParameterDescription(
+              name: 'username',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'password': _i1.ParameterDescription(
+              name: 'password',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'url': _i1.ParameterDescription(
+              name: 'url',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'fileName': _i1.ParameterDescription(
+              name: 'fileName',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'mimeType': _i1.ParameterDescription(
+              name: 'mimeType',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'fileSize': _i1.ParameterDescription(
+              name: 'fileSize',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['admin'] as _i2.AdminEndpoint).registerMedia(
+                    session,
+                    params['username'],
+                    params['password'],
+                    params['url'],
+                    params['fileName'],
+                    params['mimeType'],
+                    params['fileSize'],
+                  ),
         ),
         'getAllMedia': _i1.MethodConnector(
           name: 'getAllMedia',
@@ -604,15 +659,15 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).getAllMedia(
-            session,
-            params['username'],
-            params['password'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['admin'] as _i2.AdminEndpoint).getAllMedia(
+                session,
+                params['username'],
+                params['password'],
+              ),
         ),
         'deleteMedia': _i1.MethodConnector(
           name: 'deleteMedia',
@@ -633,16 +688,16 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).deleteMedia(
-            session,
-            params['username'],
-            params['password'],
-            params['mediaId'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['admin'] as _i2.AdminEndpoint).deleteMedia(
+                session,
+                params['username'],
+                params['password'],
+                params['mediaId'],
+              ),
         ),
       },
     );
@@ -657,25 +712,26 @@ class Endpoints extends _i1.EndpointDispatch {
               name: 'qrCode',
               type: _i1.getType<String>(),
               nullable: false,
-            )
+            ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['coffee'] as _i3.CoffeeEndpoint).getCoffeeByQR(
-            session,
-            params['qrCode'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['coffee'] as _i3.CoffeeEndpoint).getCoffeeByQR(
+                    session,
+                    params['qrCode'],
+                  ),
         ),
         'getAllCoffees': _i1.MethodConnector(
           name: 'getAllCoffees',
           params: {},
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['coffee'] as _i3.CoffeeEndpoint)
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['coffee'] as _i3.CoffeeEndpoint)
                   .getAllCoffees(session),
         ),
         'getCoffeeDetail': _i1.MethodConnector(
@@ -685,16 +741,17 @@ class Endpoints extends _i1.EndpointDispatch {
               name: 'coffeeId',
               type: _i1.getType<int>(),
               nullable: false,
-            )
+            ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['coffee'] as _i3.CoffeeEndpoint).getCoffeeDetail(
-            session,
-            params['coffeeId'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['coffee'] as _i3.CoffeeEndpoint).getCoffeeDetail(
+                    session,
+                    params['coffeeId'],
+                  ),
         ),
         'createCoffee': _i1.MethodConnector(
           name: 'createCoffee',
@@ -703,16 +760,17 @@ class Endpoints extends _i1.EndpointDispatch {
               name: 'coffee',
               type: _i1.getType<_i6.Coffee>(),
               nullable: false,
-            )
+            ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['coffee'] as _i3.CoffeeEndpoint).createCoffee(
-            session,
-            params['coffee'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['coffee'] as _i3.CoffeeEndpoint).createCoffee(
+                    session,
+                    params['coffee'],
+                  ),
         ),
         'updateCoffee': _i1.MethodConnector(
           name: 'updateCoffee',
@@ -721,16 +779,17 @@ class Endpoints extends _i1.EndpointDispatch {
               name: 'coffee',
               type: _i1.getType<_i6.Coffee>(),
               nullable: false,
-            )
+            ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['coffee'] as _i3.CoffeeEndpoint).updateCoffee(
-            session,
-            params['coffee'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['coffee'] as _i3.CoffeeEndpoint).updateCoffee(
+                    session,
+                    params['coffee'],
+                  ),
         ),
         'deleteCoffee': _i1.MethodConnector(
           name: 'deleteCoffee',
@@ -739,25 +798,26 @@ class Endpoints extends _i1.EndpointDispatch {
               name: 'coffeeId',
               type: _i1.getType<int>(),
               nullable: false,
-            )
+            ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['coffee'] as _i3.CoffeeEndpoint).deleteCoffee(
-            session,
-            params['coffeeId'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['coffee'] as _i3.CoffeeEndpoint).deleteCoffee(
+                    session,
+                    params['coffeeId'],
+                  ),
         ),
         'getAllQRCodes': _i1.MethodConnector(
           name: 'getAllQRCodes',
           params: {},
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['coffee'] as _i3.CoffeeEndpoint)
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['coffee'] as _i3.CoffeeEndpoint)
                   .getAllQRCodes(session),
         ),
         'createQRCode': _i1.MethodConnector(
@@ -767,16 +827,17 @@ class Endpoints extends _i1.EndpointDispatch {
               name: 'qrCode',
               type: _i1.getType<_i7.QRCodeMapping>(),
               nullable: false,
-            )
+            ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['coffee'] as _i3.CoffeeEndpoint).createQRCode(
-            session,
-            params['qrCode'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['coffee'] as _i3.CoffeeEndpoint).createQRCode(
+                    session,
+                    params['qrCode'],
+                  ),
         ),
         'deleteQRCode': _i1.MethodConnector(
           name: 'deleteQRCode',
@@ -785,16 +846,17 @@ class Endpoints extends _i1.EndpointDispatch {
               name: 'qrId',
               type: _i1.getType<int>(),
               nullable: false,
-            )
+            ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['coffee'] as _i3.CoffeeEndpoint).deleteQRCode(
-            session,
-            params['qrId'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['coffee'] as _i3.CoffeeEndpoint).deleteQRCode(
+                    session,
+                    params['qrId'],
+                  ),
         ),
       },
     );
@@ -821,16 +883,16 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['upload'] as _i4.UploadEndpoint).uploadFile(
-            session,
-            params['fileName'],
-            params['fileData'],
-            params['fileType'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['upload'] as _i4.UploadEndpoint).uploadFile(
+                session,
+                params['fileName'],
+                params['fileData'],
+                params['fileType'],
+              ),
         ),
         'deleteFile': _i1.MethodConnector(
           name: 'deleteFile',
@@ -839,16 +901,16 @@ class Endpoints extends _i1.EndpointDispatch {
               name: 'fileUrl',
               type: _i1.getType<String>(),
               nullable: false,
-            )
+            ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['upload'] as _i4.UploadEndpoint).deleteFile(
-            session,
-            params['fileUrl'],
-          ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['upload'] as _i4.UploadEndpoint).deleteFile(
+                session,
+                params['fileUrl'],
+              ),
         ),
       },
     );
@@ -863,17 +925,17 @@ class Endpoints extends _i1.EndpointDispatch {
               name: 'name',
               type: _i1.getType<String>(),
               nullable: false,
-            )
+            ),
           },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['greeting'] as _i5.GreetingEndpoint).hello(
-            session,
-            params['name'],
-          ),
-        )
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['greeting'] as _i5.GreetingEndpoint).hello(
+                session,
+                params['name'],
+              ),
+        ),
       },
     );
   }

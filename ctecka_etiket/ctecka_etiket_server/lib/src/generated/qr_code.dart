@@ -7,6 +7,7 @@
 // ignore_for_file: public_member_api_docs
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
+// ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
@@ -76,6 +77,7 @@ abstract class QRCodeMapping
   @override
   Map<String, dynamic> toJson() {
     return {
+      '__className__': 'QRCodeMapping',
       if (id != null) 'id': id,
       'qrCode': qrCode,
       'coffeeId': coffeeId,
@@ -87,6 +89,7 @@ abstract class QRCodeMapping
   @override
   Map<String, dynamic> toJsonForProtocol() {
     return {
+      '__className__': 'QRCodeMapping',
       if (id != null) 'id': id,
       'qrCode': qrCode,
       'coffeeId': coffeeId,
@@ -135,12 +138,12 @@ class _QRCodeMappingImpl extends QRCodeMapping {
     DateTime? createdAt,
     required bool isActive,
   }) : super._(
-          id: id,
-          qrCode: qrCode,
-          coffeeId: coffeeId,
-          createdAt: createdAt,
-          isActive: isActive,
-        );
+         id: id,
+         qrCode: qrCode,
+         coffeeId: coffeeId,
+         createdAt: createdAt,
+         isActive: isActive,
+       );
 
   /// Returns a shallow copy of this [QRCodeMapping]
   /// with some or all fields replaced by the given arguments.
@@ -163,9 +166,35 @@ class _QRCodeMappingImpl extends QRCodeMapping {
   }
 }
 
+class QRCodeMappingUpdateTable extends _i1.UpdateTable<QRCodeMappingTable> {
+  QRCodeMappingUpdateTable(super.table);
+
+  _i1.ColumnValue<String, String> qrCode(String value) => _i1.ColumnValue(
+    table.qrCode,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> coffeeId(int value) => _i1.ColumnValue(
+    table.coffeeId,
+    value,
+  );
+
+  _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime? value) =>
+      _i1.ColumnValue(
+        table.createdAt,
+        value,
+      );
+
+  _i1.ColumnValue<bool, bool> isActive(bool value) => _i1.ColumnValue(
+    table.isActive,
+    value,
+  );
+}
+
 class QRCodeMappingTable extends _i1.Table<int?> {
   QRCodeMappingTable({super.tableRelation})
-      : super(tableName: 'qr_code_mapping') {
+    : super(tableName: 'qr_code_mapping') {
+    updateTable = QRCodeMappingUpdateTable(this);
     qrCode = _i1.ColumnString(
       'qrCode',
       this,
@@ -184,6 +213,8 @@ class QRCodeMappingTable extends _i1.Table<int?> {
     );
   }
 
+  late final QRCodeMappingUpdateTable updateTable;
+
   /// The actual QR code string/value
   late final _i1.ColumnString qrCode;
 
@@ -198,12 +229,12 @@ class QRCodeMappingTable extends _i1.Table<int?> {
 
   @override
   List<_i1.Column> get columns => [
-        id,
-        qrCode,
-        coffeeId,
-        createdAt,
-        isActive,
-      ];
+    id,
+    qrCode,
+    coffeeId,
+    createdAt,
+    isActive,
+  ];
 }
 
 class QRCodeMappingInclude extends _i1.IncludeObject {
@@ -391,6 +422,46 @@ class QRCodeMappingRepository {
     return session.db.updateRow<QRCodeMapping>(
       row,
       columns: columns?.call(QRCodeMapping.t),
+      transaction: transaction,
+    );
+  }
+
+  /// Updates a single [QRCodeMapping] by its [id] with the specified [columnValues].
+  /// Returns the updated row or null if no row with the given id exists.
+  Future<QRCodeMapping?> updateById(
+    _i1.Session session,
+    int id, {
+    required _i1.ColumnValueListBuilder<QRCodeMappingUpdateTable> columnValues,
+    _i1.Transaction? transaction,
+  }) async {
+    return session.db.updateById<QRCodeMapping>(
+      id,
+      columnValues: columnValues(QRCodeMapping.t.updateTable),
+      transaction: transaction,
+    );
+  }
+
+  /// Updates all [QRCodeMapping]s matching the [where] expression with the specified [columnValues].
+  /// Returns the list of updated rows.
+  Future<List<QRCodeMapping>> updateWhere(
+    _i1.Session session, {
+    required _i1.ColumnValueListBuilder<QRCodeMappingUpdateTable> columnValues,
+    required _i1.WhereExpressionBuilder<QRCodeMappingTable> where,
+    int? limit,
+    int? offset,
+    _i1.OrderByBuilder<QRCodeMappingTable>? orderBy,
+    _i1.OrderByListBuilder<QRCodeMappingTable>? orderByList,
+    bool orderDescending = false,
+    _i1.Transaction? transaction,
+  }) async {
+    return session.db.updateWhere<QRCodeMapping>(
+      columnValues: columnValues(QRCodeMapping.t.updateTable),
+      where: where(QRCodeMapping.t),
+      limit: limit,
+      offset: offset,
+      orderBy: orderBy?.call(QRCodeMapping.t),
+      orderByList: orderByList?.call(QRCodeMapping.t),
+      orderDescending: orderDescending,
       transaction: transaction,
     );
   }

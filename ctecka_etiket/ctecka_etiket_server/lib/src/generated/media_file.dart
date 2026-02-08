@@ -7,6 +7,7 @@
 // ignore_for_file: public_member_api_docs
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
+// ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
@@ -43,8 +44,9 @@ abstract class MediaFile
       fileType: jsonSerialization['fileType'] as String,
       mimeType: jsonSerialization['mimeType'] as String,
       fileSize: jsonSerialization['fileSize'] as int,
-      uploadedAt:
-          _i1.DateTimeJsonExtension.fromJson(jsonSerialization['uploadedAt']),
+      uploadedAt: jsonSerialization['uploadedAt'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['uploadedAt']),
       uploadedBy: jsonSerialization['uploadedBy'] as String,
     );
   }
@@ -89,6 +91,7 @@ abstract class MediaFile
   @override
   Map<String, dynamic> toJson() {
     return {
+      '__className__': 'MediaFile',
       if (id != null) 'id': id,
       'url': url,
       'fileName': fileName,
@@ -103,6 +106,7 @@ abstract class MediaFile
   @override
   Map<String, dynamic> toJsonForProtocol() {
     return {
+      '__className__': 'MediaFile',
       if (id != null) 'id': id,
       'url': url,
       'fileName': fileName,
@@ -157,15 +161,15 @@ class _MediaFileImpl extends MediaFile {
     DateTime? uploadedAt,
     required String uploadedBy,
   }) : super._(
-          id: id,
-          url: url,
-          fileName: fileName,
-          fileType: fileType,
-          mimeType: mimeType,
-          fileSize: fileSize,
-          uploadedAt: uploadedAt,
-          uploadedBy: uploadedBy,
-        );
+         id: id,
+         url: url,
+         fileName: fileName,
+         fileType: fileType,
+         mimeType: mimeType,
+         fileSize: fileSize,
+         uploadedAt: uploadedAt,
+         uploadedBy: uploadedBy,
+       );
 
   /// Returns a shallow copy of this [MediaFile]
   /// with some or all fields replaced by the given arguments.
@@ -194,8 +198,49 @@ class _MediaFileImpl extends MediaFile {
   }
 }
 
+class MediaFileUpdateTable extends _i1.UpdateTable<MediaFileTable> {
+  MediaFileUpdateTable(super.table);
+
+  _i1.ColumnValue<String, String> url(String value) => _i1.ColumnValue(
+    table.url,
+    value,
+  );
+
+  _i1.ColumnValue<String, String> fileName(String value) => _i1.ColumnValue(
+    table.fileName,
+    value,
+  );
+
+  _i1.ColumnValue<String, String> fileType(String value) => _i1.ColumnValue(
+    table.fileType,
+    value,
+  );
+
+  _i1.ColumnValue<String, String> mimeType(String value) => _i1.ColumnValue(
+    table.mimeType,
+    value,
+  );
+
+  _i1.ColumnValue<int, int> fileSize(int value) => _i1.ColumnValue(
+    table.fileSize,
+    value,
+  );
+
+  _i1.ColumnValue<DateTime, DateTime> uploadedAt(DateTime value) =>
+      _i1.ColumnValue(
+        table.uploadedAt,
+        value,
+      );
+
+  _i1.ColumnValue<String, String> uploadedBy(String value) => _i1.ColumnValue(
+    table.uploadedBy,
+    value,
+  );
+}
+
 class MediaFileTable extends _i1.Table<int?> {
   MediaFileTable({super.tableRelation}) : super(tableName: 'media_files') {
+    updateTable = MediaFileUpdateTable(this);
     url = _i1.ColumnString(
       'url',
       this,
@@ -227,6 +272,8 @@ class MediaFileTable extends _i1.Table<int?> {
     );
   }
 
+  late final MediaFileUpdateTable updateTable;
+
   late final _i1.ColumnString url;
 
   late final _i1.ColumnString fileName;
@@ -243,15 +290,15 @@ class MediaFileTable extends _i1.Table<int?> {
 
   @override
   List<_i1.Column> get columns => [
-        id,
-        url,
-        fileName,
-        fileType,
-        mimeType,
-        fileSize,
-        uploadedAt,
-        uploadedBy,
-      ];
+    id,
+    url,
+    fileName,
+    fileType,
+    mimeType,
+    fileSize,
+    uploadedAt,
+    uploadedBy,
+  ];
 }
 
 class MediaFileInclude extends _i1.IncludeObject {
@@ -439,6 +486,46 @@ class MediaFileRepository {
     return session.db.updateRow<MediaFile>(
       row,
       columns: columns?.call(MediaFile.t),
+      transaction: transaction,
+    );
+  }
+
+  /// Updates a single [MediaFile] by its [id] with the specified [columnValues].
+  /// Returns the updated row or null if no row with the given id exists.
+  Future<MediaFile?> updateById(
+    _i1.Session session,
+    int id, {
+    required _i1.ColumnValueListBuilder<MediaFileUpdateTable> columnValues,
+    _i1.Transaction? transaction,
+  }) async {
+    return session.db.updateById<MediaFile>(
+      id,
+      columnValues: columnValues(MediaFile.t.updateTable),
+      transaction: transaction,
+    );
+  }
+
+  /// Updates all [MediaFile]s matching the [where] expression with the specified [columnValues].
+  /// Returns the list of updated rows.
+  Future<List<MediaFile>> updateWhere(
+    _i1.Session session, {
+    required _i1.ColumnValueListBuilder<MediaFileUpdateTable> columnValues,
+    required _i1.WhereExpressionBuilder<MediaFileTable> where,
+    int? limit,
+    int? offset,
+    _i1.OrderByBuilder<MediaFileTable>? orderBy,
+    _i1.OrderByListBuilder<MediaFileTable>? orderByList,
+    bool orderDescending = false,
+    _i1.Transaction? transaction,
+  }) async {
+    return session.db.updateWhere<MediaFile>(
+      columnValues: columnValues(MediaFile.t.updateTable),
+      where: where(MediaFile.t),
+      limit: limit,
+      offset: offset,
+      orderBy: orderBy?.call(MediaFile.t),
+      orderByList: orderByList?.call(MediaFile.t),
+      orderDescending: orderDescending,
       transaction: transaction,
     );
   }

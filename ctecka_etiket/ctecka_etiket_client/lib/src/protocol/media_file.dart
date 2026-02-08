@@ -7,6 +7,7 @@
 // ignore_for_file: public_member_api_docs
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
+// ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
@@ -42,8 +43,9 @@ abstract class MediaFile implements _i1.SerializableModel {
       fileType: jsonSerialization['fileType'] as String,
       mimeType: jsonSerialization['mimeType'] as String,
       fileSize: jsonSerialization['fileSize'] as int,
-      uploadedAt:
-          _i1.DateTimeJsonExtension.fromJson(jsonSerialization['uploadedAt']),
+      uploadedAt: jsonSerialization['uploadedAt'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['uploadedAt']),
       uploadedBy: jsonSerialization['uploadedBy'] as String,
     );
   }
@@ -83,6 +85,7 @@ abstract class MediaFile implements _i1.SerializableModel {
   @override
   Map<String, dynamic> toJson() {
     return {
+      '__className__': 'MediaFile',
       if (id != null) 'id': id,
       'url': url,
       'fileName': fileName,
@@ -113,15 +116,15 @@ class _MediaFileImpl extends MediaFile {
     DateTime? uploadedAt,
     required String uploadedBy,
   }) : super._(
-          id: id,
-          url: url,
-          fileName: fileName,
-          fileType: fileType,
-          mimeType: mimeType,
-          fileSize: fileSize,
-          uploadedAt: uploadedAt,
-          uploadedBy: uploadedBy,
-        );
+         id: id,
+         url: url,
+         fileName: fileName,
+         fileType: fileType,
+         mimeType: mimeType,
+         fileSize: fileSize,
+         uploadedAt: uploadedAt,
+         uploadedBy: uploadedBy,
+       );
 
   /// Returns a shallow copy of this [MediaFile]
   /// with some or all fields replaced by the given arguments.

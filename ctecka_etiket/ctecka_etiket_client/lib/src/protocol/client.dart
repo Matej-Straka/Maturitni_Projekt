@@ -7,6 +7,7 @@
 // ignore_for_file: public_member_api_docs
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
+// ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
@@ -37,21 +38,20 @@ class EndpointAdmin extends _i1.EndpointRef {
     String moreInfo,
     String videoUrl,
     String imageUrl,
-  ) =>
-      caller.callServerEndpoint<_i3.Coffee?>(
-        'admin',
-        'createCoffee',
-        {
-          'username': username,
-          'password': password,
-          'name': name,
-          'description': description,
-          'composition': composition,
-          'moreInfo': moreInfo,
-          'videoUrl': videoUrl,
-          'imageUrl': imageUrl,
-        },
-      );
+  ) => caller.callServerEndpoint<_i3.Coffee?>(
+    'admin',
+    'createCoffee',
+    {
+      'username': username,
+      'password': password,
+      'name': name,
+      'description': description,
+      'composition': composition,
+      'moreInfo': moreInfo,
+      'videoUrl': videoUrl,
+      'imageUrl': imageUrl,
+    },
+  );
 
   /// Update existing coffee
   _i2.Future<_i3.Coffee?> updateCoffee(
@@ -64,38 +64,36 @@ class EndpointAdmin extends _i1.EndpointRef {
     String moreInfo,
     String videoUrl,
     String imageUrl,
-  ) =>
-      caller.callServerEndpoint<_i3.Coffee?>(
-        'admin',
-        'updateCoffee',
-        {
-          'username': username,
-          'password': password,
-          'coffeeId': coffeeId,
-          'name': name,
-          'description': description,
-          'composition': composition,
-          'moreInfo': moreInfo,
-          'videoUrl': videoUrl,
-          'imageUrl': imageUrl,
-        },
-      );
+  ) => caller.callServerEndpoint<_i3.Coffee?>(
+    'admin',
+    'updateCoffee',
+    {
+      'username': username,
+      'password': password,
+      'coffeeId': coffeeId,
+      'name': name,
+      'description': description,
+      'composition': composition,
+      'moreInfo': moreInfo,
+      'videoUrl': videoUrl,
+      'imageUrl': imageUrl,
+    },
+  );
 
   /// Delete coffee
   _i2.Future<bool> deleteCoffee(
     String username,
     String password,
     int coffeeId,
-  ) =>
-      caller.callServerEndpoint<bool>(
-        'admin',
-        'deleteCoffee',
-        {
-          'username': username,
-          'password': password,
-          'coffeeId': coffeeId,
-        },
-      );
+  ) => caller.callServerEndpoint<bool>(
+    'admin',
+    'deleteCoffee',
+    {
+      'username': username,
+      'password': password,
+      'coffeeId': coffeeId,
+    },
+  );
 
   /// ========== QR Code Management ==========
   /// Assign QR code to coffee
@@ -104,76 +102,71 @@ class EndpointAdmin extends _i1.EndpointRef {
     String password,
     String qrCode,
     int coffeeId,
-  ) =>
-      caller.callServerEndpoint<_i4.QRCodeMapping?>(
-        'admin',
-        'assignQRCode',
-        {
-          'username': username,
-          'password': password,
-          'qrCode': qrCode,
-          'coffeeId': coffeeId,
-        },
-      );
+  ) => caller.callServerEndpoint<_i4.QRCodeMapping?>(
+    'admin',
+    'assignQRCode',
+    {
+      'username': username,
+      'password': password,
+      'qrCode': qrCode,
+      'coffeeId': coffeeId,
+    },
+  );
 
   /// Get all QR code mappings
   _i2.Future<List<_i4.QRCodeMapping>> getAllQRMappings(
     String username,
     String password,
-  ) =>
-      caller.callServerEndpoint<List<_i4.QRCodeMapping>>(
-        'admin',
-        'getAllQRMappings',
-        {
-          'username': username,
-          'password': password,
-        },
-      );
+  ) => caller.callServerEndpoint<List<_i4.QRCodeMapping>>(
+    'admin',
+    'getAllQRMappings',
+    {
+      'username': username,
+      'password': password,
+    },
+  );
 
   /// Delete QR code mapping
   _i2.Future<bool> deleteQRMapping(
     String username,
     String password,
     int mappingId,
-  ) =>
-      caller.callServerEndpoint<bool>(
-        'admin',
-        'deleteQRMapping',
-        {
-          'username': username,
-          'password': password,
-          'mappingId': mappingId,
-        },
-      );
+  ) => caller.callServerEndpoint<bool>(
+    'admin',
+    'deleteQRMapping',
+    {
+      'username': username,
+      'password': password,
+      'mappingId': mappingId,
+    },
+  );
 
   /// ========== User Management ==========
   /// Get available user roles
   _i2.Future<List<String>> getRoles(
     String username,
     String password,
-  ) =>
-      caller.callServerEndpoint<List<String>>(
-        'admin',
-        'getRoles',
-        {
-          'username': username,
-          'password': password,
-        },
-      );
+  ) => caller.callServerEndpoint<List<String>>(
+    'admin',
+    'getRoles',
+    {
+      'username': username,
+      'password': password,
+    },
+  );
 
   /// Get current user's role
   _i2.Future<String?> getCurrentUserRole(
     String username,
     String password,
-  ) =>
-      caller.callServerEndpoint<String?>(
-        'admin',
-        'getCurrentUserRole',
-        {
-          'username': username,
-          'password': password,
-        },
-      );
+  ) => caller.callServerEndpoint<String?>(
+    'admin',
+    'getCurrentUserRole',
+    {
+      'username': username,
+      'password': password,
+    },
+  );
 
   /// Create new admin user
   _i2.Future<_i5.AppUser?> createUser(
@@ -183,33 +176,31 @@ class EndpointAdmin extends _i1.EndpointRef {
     String newPassword,
     String email,
     String role,
-  ) =>
-      caller.callServerEndpoint<_i5.AppUser?>(
-        'admin',
-        'createUser',
-        {
-          'adminUsername': adminUsername,
-          'adminPassword': adminPassword,
-          'newUsername': newUsername,
-          'newPassword': newPassword,
-          'email': email,
-          'role': role,
-        },
-      );
+  ) => caller.callServerEndpoint<_i5.AppUser?>(
+    'admin',
+    'createUser',
+    {
+      'adminUsername': adminUsername,
+      'adminPassword': adminPassword,
+      'newUsername': newUsername,
+      'newPassword': newPassword,
+      'email': email,
+      'role': role,
+    },
+  );
 
   /// Get all users
   _i2.Future<List<_i5.AppUser>> getAllUsers(
     String username,
     String password,
-  ) =>
-      caller.callServerEndpoint<List<_i5.AppUser>>(
-        'admin',
-        'getAllUsers',
-        {
-          'username': username,
-          'password': password,
-        },
-      );
+  ) => caller.callServerEndpoint<List<_i5.AppUser>>(
+    'admin',
+    'getAllUsers',
+    {
+      'username': username,
+      'password': password,
+    },
+  );
 
   /// Update user
   _i2.Future<_i5.AppUser?> updateUser(
@@ -219,65 +210,61 @@ class EndpointAdmin extends _i1.EndpointRef {
     String? email,
     String? role,
     String? newPassword,
-  ) =>
-      caller.callServerEndpoint<_i5.AppUser?>(
-        'admin',
-        'updateUser',
-        {
-          'adminUsername': adminUsername,
-          'adminPassword': adminPassword,
-          'userId': userId,
-          'email': email,
-          'role': role,
-          'newPassword': newPassword,
-        },
-      );
+  ) => caller.callServerEndpoint<_i5.AppUser?>(
+    'admin',
+    'updateUser',
+    {
+      'adminUsername': adminUsername,
+      'adminPassword': adminPassword,
+      'userId': userId,
+      'email': email,
+      'role': role,
+      'newPassword': newPassword,
+    },
+  );
 
   /// Delete user
   _i2.Future<bool> deleteUser(
     String adminUsername,
     String adminPassword,
     int userId,
-  ) =>
-      caller.callServerEndpoint<bool>(
-        'admin',
-        'deleteUser',
-        {
-          'adminUsername': adminUsername,
-          'adminPassword': adminPassword,
-          'userId': userId,
-        },
-      );
+  ) => caller.callServerEndpoint<bool>(
+    'admin',
+    'deleteUser',
+    {
+      'adminUsername': adminUsername,
+      'adminPassword': adminPassword,
+      'userId': userId,
+    },
+  );
 
   /// Toggle user active status
   _i2.Future<_i5.AppUser?> toggleUserActive(
     String adminUsername,
     String adminPassword,
     int userId,
-  ) =>
-      caller.callServerEndpoint<_i5.AppUser?>(
-        'admin',
-        'toggleUserActive',
-        {
-          'adminUsername': adminUsername,
-          'adminPassword': adminPassword,
-          'userId': userId,
-        },
-      );
+  ) => caller.callServerEndpoint<_i5.AppUser?>(
+    'admin',
+    'toggleUserActive',
+    {
+      'adminUsername': adminUsername,
+      'adminPassword': adminPassword,
+      'userId': userId,
+    },
+  );
 
   /// Login and verify credentials
   _i2.Future<_i5.AppUser?> login(
     String username,
     String password,
-  ) =>
-      caller.callServerEndpoint<_i5.AppUser?>(
-        'admin',
-        'login',
-        {
-          'username': username,
-          'password': password,
-        },
-      );
+  ) => caller.callServerEndpoint<_i5.AppUser?>(
+    'admin',
+    'login',
+    {
+      'username': username,
+      'password': password,
+    },
+  );
 
   /// ========== File Upload ==========
   /// Upload a file (base64 encoded)
@@ -287,18 +274,17 @@ class EndpointAdmin extends _i1.EndpointRef {
     String fileName,
     String fileDataBase64,
     String fileType,
-  ) =>
-      caller.callServerEndpoint<String?>(
-        'admin',
-        'uploadFileBase64',
-        {
-          'username': username,
-          'password': password,
-          'fileName': fileName,
-          'fileDataBase64': fileDataBase64,
-          'fileType': fileType,
-        },
-      );
+  ) => caller.callServerEndpoint<String?>(
+    'admin',
+    'uploadFileBase64',
+    {
+      'username': username,
+      'password': password,
+      'fileName': fileName,
+      'fileDataBase64': fileDataBase64,
+      'fileType': fileType,
+    },
+  );
 
   /// Register uploaded media (used with static server multipart upload)
   _i2.Future<_i6.MediaFile?> registerMedia(
@@ -308,49 +294,46 @@ class EndpointAdmin extends _i1.EndpointRef {
     String fileName,
     String mimeType,
     int fileSize,
-  ) =>
-      caller.callServerEndpoint<_i6.MediaFile?>(
-        'admin',
-        'registerMedia',
-        {
-          'username': username,
-          'password': password,
-          'url': url,
-          'fileName': fileName,
-          'mimeType': mimeType,
-          'fileSize': fileSize,
-        },
-      );
+  ) => caller.callServerEndpoint<_i6.MediaFile?>(
+    'admin',
+    'registerMedia',
+    {
+      'username': username,
+      'password': password,
+      'url': url,
+      'fileName': fileName,
+      'mimeType': mimeType,
+      'fileSize': fileSize,
+    },
+  );
 
   /// Get all uploaded media files
   _i2.Future<List<_i6.MediaFile>> getAllMedia(
     String username,
     String password,
-  ) =>
-      caller.callServerEndpoint<List<_i6.MediaFile>>(
-        'admin',
-        'getAllMedia',
-        {
-          'username': username,
-          'password': password,
-        },
-      );
+  ) => caller.callServerEndpoint<List<_i6.MediaFile>>(
+    'admin',
+    'getAllMedia',
+    {
+      'username': username,
+      'password': password,
+    },
+  );
 
   /// Delete a media file
   _i2.Future<bool> deleteMedia(
     String username,
     String password,
     int mediaId,
-  ) =>
-      caller.callServerEndpoint<bool>(
-        'admin',
-        'deleteMedia',
-        {
-          'username': username,
-          'password': password,
-          'mediaId': mediaId,
-        },
-      );
+  ) => caller.callServerEndpoint<bool>(
+    'admin',
+    'deleteMedia',
+    {
+      'username': username,
+      'password': password,
+      'mediaId': mediaId,
+    },
+  );
 }
 
 /// Endpoint for coffee-related operations (mobile app)
@@ -427,10 +410,10 @@ class EndpointCoffee extends _i1.EndpointRef {
 
   /// Delete QR code
   _i2.Future<bool> deleteQRCode(int qrId) => caller.callServerEndpoint<bool>(
-        'coffee',
-        'deleteQRCode',
-        {'qrId': qrId},
-      );
+    'coffee',
+    'deleteQRCode',
+    {'qrId': qrId},
+  );
 }
 
 /// Endpoint for file uploads
@@ -446,16 +429,15 @@ class EndpointUpload extends _i1.EndpointRef {
     String fileName,
     List<int> fileData,
     String fileType,
-  ) =>
-      caller.callServerEndpoint<String?>(
-        'upload',
-        'uploadFile',
-        {
-          'fileName': fileName,
-          'fileData': fileData,
-          'fileType': fileType,
-        },
-      );
+  ) => caller.callServerEndpoint<String?>(
+    'upload',
+    'uploadFile',
+    {
+      'fileName': fileName,
+      'fileData': fileData,
+      'fileType': fileType,
+    },
+  );
 
   /// Delete uploaded file
   _i2.Future<bool> deleteFile(String fileUrl) =>
@@ -488,28 +470,31 @@ class Client extends _i1.ServerpodClientShared {
   Client(
     String host, {
     dynamic securityContext,
-    _i1.AuthenticationKeyManager? authenticationKeyManager,
+    @Deprecated(
+      'Use authKeyProvider instead. This will be removed in future releases.',
+    )
+    super.authenticationKeyManager,
     Duration? streamingConnectionTimeout,
     Duration? connectionTimeout,
     Function(
       _i1.MethodCallContext,
       Object,
       StackTrace,
-    )? onFailedCall,
+    )?
+    onFailedCall,
     Function(_i1.MethodCallContext)? onSucceededCall,
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
-          host,
-          _i8.Protocol(),
-          securityContext: securityContext,
-          authenticationKeyManager: authenticationKeyManager,
-          streamingConnectionTimeout: streamingConnectionTimeout,
-          connectionTimeout: connectionTimeout,
-          onFailedCall: onFailedCall,
-          onSucceededCall: onSucceededCall,
-          disconnectStreamsOnLostInternetConnection:
-              disconnectStreamsOnLostInternetConnection,
-        ) {
+         host,
+         _i8.Protocol(),
+         securityContext: securityContext,
+         streamingConnectionTimeout: streamingConnectionTimeout,
+         connectionTimeout: connectionTimeout,
+         onFailedCall: onFailedCall,
+         onSucceededCall: onSucceededCall,
+         disconnectStreamsOnLostInternetConnection:
+             disconnectStreamsOnLostInternetConnection,
+       ) {
     admin = EndpointAdmin(this);
     coffee = EndpointCoffee(this);
     upload = EndpointUpload(this);
@@ -526,11 +511,11 @@ class Client extends _i1.ServerpodClientShared {
 
   @override
   Map<String, _i1.EndpointRef> get endpointRefLookup => {
-        'admin': admin,
-        'coffee': coffee,
-        'upload': upload,
-        'greeting': greeting,
-      };
+    'admin': admin,
+    'coffee': coffee,
+    'upload': upload,
+    'greeting': greeting,
+  };
 
   @override
   Map<String, _i1.ModuleEndpointCaller> get moduleLookup => {};

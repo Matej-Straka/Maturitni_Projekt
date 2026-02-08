@@ -7,6 +7,7 @@
 // ignore_for_file: public_member_api_docs
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
+// ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
@@ -33,12 +34,33 @@ class Protocol extends _i1.SerializationManager {
 
   static final Protocol _instance = Protocol._();
 
+  static String? getClassNameFromObjectJson(dynamic data) {
+    if (data is! Map) return null;
+    final className = data['__className__'] as String?;
+    return className;
+  }
+
   @override
   T deserialize<T>(
     dynamic data, [
     Type? t,
   ]) {
     t ??= T;
+
+    final dataClassName = getClassNameFromObjectJson(data);
+    if (dataClassName != null && dataClassName != getClassNameForType(t)) {
+      try {
+        return deserializeByClassName({
+          'className': dataClassName,
+          'data': data,
+        });
+      } on FormatException catch (_) {
+        // If the className is not recognized (e.g., older client receiving
+        // data with a new subtype), fall back to deserializing without the
+        // className, using the expected type T.
+      }
+    }
+
     if (t == _i2.AppUser) {
       return _i2.AppUser.fromJson(data) as T;
     }
@@ -71,8 +93,9 @@ class Protocol extends _i1.SerializationManager {
     }
     if (t == List<_i7.QRCodeMapping>) {
       return (data as List)
-          .map((e) => deserialize<_i7.QRCodeMapping>(e))
-          .toList() as T;
+              .map((e) => deserialize<_i7.QRCodeMapping>(e))
+              .toList()
+          as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
@@ -95,24 +118,40 @@ class Protocol extends _i1.SerializationManager {
     return super.deserialize<T>(data, t);
   }
 
+  static String? getClassNameForType(Type type) {
+    return switch (type) {
+      _i2.AppUser => 'AppUser',
+      _i3.Coffee => 'Coffee',
+      _i4.Greeting => 'Greeting',
+      _i5.MediaFile => 'MediaFile',
+      _i6.QRCodeMapping => 'QRCodeMapping',
+      _ => null,
+    };
+  }
+
   @override
   String? getClassNameForObject(Object? data) {
     String? className = super.getClassNameForObject(data);
     if (className != null) return className;
-    if (data is _i2.AppUser) {
-      return 'AppUser';
+
+    if (data is Map<String, dynamic> && data['__className__'] is String) {
+      return (data['__className__'] as String).replaceFirst(
+        'ctecka_etiket.',
+        '',
+      );
     }
-    if (data is _i3.Coffee) {
-      return 'Coffee';
-    }
-    if (data is _i4.Greeting) {
-      return 'Greeting';
-    }
-    if (data is _i5.MediaFile) {
-      return 'MediaFile';
-    }
-    if (data is _i6.QRCodeMapping) {
-      return 'QRCodeMapping';
+
+    switch (data) {
+      case _i2.AppUser():
+        return 'AppUser';
+      case _i3.Coffee():
+        return 'Coffee';
+      case _i4.Greeting():
+        return 'Greeting';
+      case _i5.MediaFile():
+        return 'MediaFile';
+      case _i6.QRCodeMapping():
+        return 'QRCodeMapping';
     }
     return null;
   }
@@ -139,5 +178,17 @@ class Protocol extends _i1.SerializationManager {
       return deserialize<_i6.QRCodeMapping>(data['data']);
     }
     return super.deserializeByClassName(data);
+  }
+
+  /// Maps any `Record`s known to this [Protocol] to their JSON representation
+  ///
+  /// Throws in case the record type is not known.
+  ///
+  /// This method will return `null` (only) for `null` inputs.
+  Map<String, dynamic>? mapRecordToJson(Record? record) {
+    if (record == null) {
+      return null;
+    }
+    throw Exception('Unsupported record type ${record.runtimeType}');
   }
 }

@@ -7,6 +7,7 @@
 // ignore_for_file: public_member_api_docs
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
+// ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
@@ -29,8 +30,9 @@ abstract class Greeting implements _i1.SerializableModel {
     return Greeting(
       message: jsonSerialization['message'] as String,
       author: jsonSerialization['author'] as String,
-      timestamp:
-          _i1.DateTimeJsonExtension.fromJson(jsonSerialization['timestamp']),
+      timestamp: _i1.DateTimeJsonExtension.fromJson(
+        jsonSerialization['timestamp'],
+      ),
     );
   }
 
@@ -54,6 +56,7 @@ abstract class Greeting implements _i1.SerializableModel {
   @override
   Map<String, dynamic> toJson() {
     return {
+      '__className__': 'Greeting',
       'message': message,
       'author': author,
       'timestamp': timestamp.toJson(),
@@ -72,10 +75,10 @@ class _GreetingImpl extends Greeting {
     required String author,
     required DateTime timestamp,
   }) : super._(
-          message: message,
-          author: author,
-          timestamp: timestamp,
-        );
+         message: message,
+         author: author,
+         timestamp: timestamp,
+       );
 
   /// Returns a shallow copy of this [Greeting]
   /// with some or all fields replaced by the given arguments.
