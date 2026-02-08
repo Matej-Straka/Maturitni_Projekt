@@ -54,7 +54,9 @@ Future<String?> uploadFile(File file, String type, String username, String passw
       return null;
     }
 
-    await client.admin.registerMedia(username, password, url, savedFileName, mimeType, fileSize);
+    print('Registering media: url=$url, fileName=$savedFileName, mimeType=$mimeType, size=$fileSize');
+    final result = await client.admin.registerMedia(username, password, url, savedFileName, mimeType, fileSize);
+    print('Register result: $result');
     return url;
   } catch (e) {
     print('Upload error: $e');
