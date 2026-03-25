@@ -22,6 +22,7 @@ jobs:
         working-directory: aplikace/ctecka_etiket_flutter/ios
 
       - run: flutter build ios --release --no-codesign
+        working-directory: aplikace/ctecka_etiket_flutter
 
       - run: mkdir Payload
         working-directory: aplikace/ctecka_etiket_flutter/build/ios/iphoneos
@@ -37,7 +38,7 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/ios/iphoneos/FlutterIpaExport.ipa
+          file: aplikace/ctecka_etiket_flutter/build/ios/iphoneos/FlutterIpaExport.ipa
           tag: v1.0
           overwrite: true
           body: "This is first release"
