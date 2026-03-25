@@ -2,37 +2,12 @@
 
 Mobilní aplikace pro prezentaci kávy prostřednictvím QR kódů s admin rozhraním pro správu obsahu.
 
-## Architektura
-
-```
-┌─────────────────┐         ┌──────────────────┐
-│  Mobile App     │◄────────┤  Serverpod API   │
-│  (Flutter)      │  HTTP   │  (Dart)          │
-│  iOS/Android    │         │  localhost:8080  │
-└─────────────────┘         └──────────────────┘
-        │                            │
-        │ Scan QR                    │
-        │ Get Coffee                 │
-        │ Play Video                 ▼
-        │                    ┌──────────────────┐
-        │                    │   PostgreSQL     │
-        │                    │   Database       │
-        │                    └──────────────────┘
-        │                            ▲
-┌─────────────────┐                 │
-│  Admin Panel    │◄────────────────┘
-│  (Flutter Web)  │  HTTP + Auth
-│  Chrome         │
-└─────────────────┘
-```
-
 ## Technologie
 
 - **Backend**: Serverpod 2.9
 - **Database**: PostgreSQL
 - **Mobile App**: Flutter (iOS/Android)
 - **Admin Panel**: Flutter Web
-- **Features**: QR scanning, video playback, content management
 
 ## Struktura projektu
 
@@ -123,9 +98,10 @@ echo -n "your_password" | shasum -a 256
 ```bash
 cd ctecka_etiket_server
 dart run bin/main.dart
+dart run bin/static_server.dart
 ```
 
-Server poběží na `http://localhost:8080`
+Server poběží na `http://localhost:8080` a `http://localhost:8090`
 
 ### 7. Spuštění mobilní aplikace
 

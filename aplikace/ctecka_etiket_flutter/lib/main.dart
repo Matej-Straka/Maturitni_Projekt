@@ -6,19 +6,17 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'dart:io';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'theme/app_theme.dart';
 
 late Client client;
-String serverUrl = 'https://ctecka-etiket.duckdns.org/';
-String staticServerUrl = 'https://ctecka-etiket.duckdns.org/';
+const String serverUrl = 'https://ctecka-etiket.duckdns.org/';
+const String staticServerUrl = 'https://ctecka-etiket.duckdns.org/';
 
 // Helper function to get full URL for media files
 String getMediaUrl(String url) {
   if (url.startsWith('http')) {
     return url;
   }
-  // Keep /uploads/ prefix so Caddy routes to static server
   final cleanUrl = url;
   final base = staticServerUrl.endsWith('/')
       ? staticServerUrl.substring(0, staticServerUrl.length - 1)
@@ -29,45 +27,8 @@ String getMediaUrl(String url) {
   return uri.toString();
 }
 
-// Load server settings from SharedPreferences
-Future<void> loadServerSettings() async {
-  final prefs = await SharedPreferences.getInstance();
-  serverUrl = prefs.getString('serverUrl') ?? 'https://ctecka-etiket.duckdns.org/';
-  staticServerUrl =
-      prefs.getString('staticServerUrl') ?? 'https://ctecka-etiket.duckdns.org/';
-
-  serverUrl = _normalizeBaseUrl(serverUrl);
-  staticServerUrl = _normalizeBaseUrl(staticServerUrl);
-}
-
-String _normalizeBaseUrl(String url) {
-  var normalized = url.trim();
-  if (normalized.startsWith('http://')) {
-    normalized = normalized.replaceFirst('http://', 'https://');
-  }
-  if (normalized.endsWith('/uploads') || normalized.endsWith('/uploads/')) {
-    normalized = normalized.replaceFirst(RegExp(r'/uploads/?$'), '/');
-  }
-  if (!normalized.endsWith('/')) {
-    normalized = '$normalized/';
-  }
-  return normalized;
-}
-
-// Save server settings to SharedPreferences
-Future<void> saveServerSettings(String apiUrl, String staticUrl) async {
-  final prefs = await SharedPreferences.getInstance();
-  final normalizedApi = _normalizeBaseUrl(apiUrl);
-  final normalizedStatic = _normalizeBaseUrl(staticUrl);
-  await prefs.setString('serverUrl', normalizedApi);
-  await prefs.setString('staticServerUrl', normalizedStatic);
-  serverUrl = normalizedApi;
-  staticServerUrl = normalizedStatic;
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await loadServerSettings();
   client = Client(serverUrl)
     ..connectivityMonitor = FlutterConnectivityMonitor();
   WidgetsFlutterBinding.ensureInitialized();
@@ -99,28 +60,63 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   final PageController _pc = PageController();
   int _page = 0;
 
+  static const List<String> _onboardingImages = [
+    'web/icons/Icon-192.png',
+    'web/icons/Icon-maskable-192.png',
+    'web/icons/Icon-512.png',
+  ];
+
   @override
   void dispose() {
     _pc.dispose();
     super.dispose();
   }
 
-  Widget _buildPage(String title, String body) {
+  Widget _buildPage(String title, String body, String imagePath) {
     return Container(
 
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 30),
       child: Column(
         children: [
           const Spacer(flex: 2),
-          Container(
-            width: 200,
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(12),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 450),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) {
+              final slide = Tween<Offset>(
+                begin: const Offset(0.08, 0),
+                end: Offset.zero,
+              ).animate(animation);
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(position: slide, child: child),
+              );
+            },
+            child: Container(
+              key: ValueKey(imagePath),
+              width: 220,
+              height: 220,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(25),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
-            child:
-                Icon(Icons.image_outlined, size: 80, color: Colors.grey[400]),
           ),
           const Spacer(flex: 1),
           Container(
@@ -218,14 +214,24 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       body: SafeArea(
         child: PageView(
           controller: _pc,
+          physics: const NeverScrollableScrollPhysics(),
           onPageChanged: (i) => setState(() => _page = i),
           children: [
-            _buildPage('VÍTEJTE U PŘEDSTAVENÍ KÁV',
-                'Tato aplikace slouží jako interaktivní představení naších káv pomocí QR kódů na jejich obalu'),
-            _buildPage('1. KROK',
-                'Načtete qr kod na obalu jedné z naších káv'),
-            _buildPage('2. KROK',
-                'Přehraje se video a poté vyskočí menu kde můžete najít složení a více informací o kávě'),
+            _buildPage(
+              'VÍTEJTE U PŘEDSTAVENÍ KÁV',
+              'Tato aplikace slouží jako interaktivní představení naších káv pomocí QR kódů na jejich obalu',
+              _onboardingImages[0],
+            ),
+            _buildPage(
+              '1. KROK',
+              'Načtete QR kód na obalu jedné z naších káv',
+              _onboardingImages[1],
+            ),
+            _buildPage(
+              '2. KROK',
+              'Přehraje se video a poté vyskočí menu kde můžete najít složení a více informací o kávě',
+              _onboardingImages[2],
+            ),
           ],
         ),
       ),
@@ -246,6 +252,31 @@ class _QRScannerPageState extends State<QRScannerPage>
   QRViewController? controller;
   bool _isProcessing = false;
   bool _cameraActive = true;
+  bool _scannerVisible = true;
+
+  void _deactivateScanner() {
+    controller?.pauseCamera();
+    controller?.dispose();
+    controller = null;
+    if (mounted) {
+      setState(() {
+        _cameraActive = false;
+        _scannerVisible = false;
+      });
+    } else {
+      _cameraActive = false;
+      _scannerVisible = false;
+    }
+  }
+
+  void _activateScanner() {
+    if (!mounted) return;
+    setState(() {
+      _scannerVisible = true;
+      _cameraActive = false;
+      _isProcessing = false;
+    });
+  }
 
   @override
   void initState() {
@@ -270,7 +301,7 @@ class _QRScannerPageState extends State<QRScannerPage>
       controller?.pauseCamera();
       _cameraActive = false;
     } else if (state == AppLifecycleState.resumed) {
-      if (!_cameraActive) {
+      if (_scannerVisible && !_cameraActive && !_isProcessing) {
         controller?.resumeCamera();
         _cameraActive = true;
       }
@@ -291,25 +322,17 @@ class _QRScannerPageState extends State<QRScannerPage>
       if (scanData.code == null) return;
 
       setState(() => _isProcessing = true);
-      controller.pauseCamera();
-      _cameraActive = false;
+      _deactivateScanner();
 
       Navigator.of(context)
           .push(
         MaterialPageRoute(
-            builder: (_) => LoadingCoffeePage(qrCode: scanData.code!)),
+          builder: (_) => LoadingCoffeePage(qrCode: scanData.code!),
+        ),
       )
           .then((_) {
-        if (mounted) {
-          setState(() => _isProcessing = false);
-          // On iOS, we need to explicitly resume camera after navigation
-          Future.delayed(const Duration(milliseconds: 300), () {
-            if (mounted) {
-              controller.resumeCamera();
-              _cameraActive = true;
-            }
-          });
-        }
+        if (!mounted) return;
+        _activateScanner();
       });
     });
   }
@@ -320,18 +343,21 @@ class _QRScannerPageState extends State<QRScannerPage>
       backgroundColor: AppTheme.surface,
       body: Stack(
         children: [
-          QRView(
-            key: qrKey,
-            onQRViewCreated: _onQRViewCreated,
-            overlay: QrScannerOverlayShape(
-              borderColor: AppTheme.primary,
-              borderRadius: 20,
-              borderLength: 40,
-              borderWidth: 8,
-              cutOutSize: MediaQuery.of(context).size.width * 0.7,
-              overlayColor: Colors.black.withAlpha(420)
-            ),
-          ),
+          if (_scannerVisible)
+            QRView(
+              key: qrKey,
+              onQRViewCreated: _onQRViewCreated,
+              overlay: QrScannerOverlayShape(
+                borderColor: AppTheme.primary,
+                borderRadius: 20,
+                borderLength: 40,
+                borderWidth: 8,
+                cutOutSize: MediaQuery.of(context).size.width * 0.7,
+                overlayColor: Colors.black.withAlpha(420),
+              ),
+            )
+          else
+            Container(color: AppTheme.surface),
           // Info text nahoře
           Positioned(
             top: 0,
@@ -348,30 +374,15 @@ class _QRScannerPageState extends State<QRScannerPage>
                     colors: [Colors.transparent, Colors.transparent],
                   ),
                 ),
-                child: Row(
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        'Namiřte fotoaparát na QR kód',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 25,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: "Snug Variable",
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.settings, color: Colors.white),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (_) => const SettingsPage()),
-                        );
-                      },
-                    ),
-                  ],
+                child: const Text(
+                  'Namiřte fotoaparát na QR kód',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 25,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: "Snug Variable",
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
@@ -388,13 +399,13 @@ class _QRScannerPageState extends State<QRScannerPage>
                 child: ElevatedButton(
                         onPressed: () async {
                           // Zobraz dialog pro manuální zadání QR kódu
-                          final controller = TextEditingController();
+                          final qrInputController = TextEditingController();
                           final result = await showDialog<String>(
                             context: context,
                             builder: (ctx) => AlertDialog(
                               title: const Text('Zadat QR kód'),
                               content: TextField(
-                                controller: controller,
+                                controller: qrInputController,
                                 decoration: const InputDecoration(
                                   labelText: 'QR kód',
                                   hintText: 'Zadejte QR kód kávy',
@@ -408,7 +419,7 @@ class _QRScannerPageState extends State<QRScannerPage>
                                 ),
                                 TextButton(
                                   onPressed: () =>
-                                      Navigator.pop(ctx, controller.text),
+                                      Navigator.pop(ctx, qrInputController.text),
                                   child: const Text('OK'),
                                 ),
                               ],
@@ -429,8 +440,14 @@ class _QRScannerPageState extends State<QRScannerPage>
                                 );
                               } else {
                                 if (!mounted) return;
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (_) => VideoPage(coffee: coffee)));
+                                _deactivateScanner();
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => VideoPage(coffee: coffee),
+                                  ),
+                                );
+                                if (!mounted) return;
+                                _activateScanner();
                               }
                             } catch (e) {
                               if (!mounted) return;
@@ -454,7 +471,7 @@ class _QRScannerPageState extends State<QRScannerPage>
                               borderRadius: BorderRadius.circular(12)),
                           elevation: 2,
                         ),
-                        child: const Text('Zadat kavu ručně',
+                        child: const Text('Zadat kávu ručně',
                             style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w600,
@@ -500,9 +517,11 @@ class _LoadingCoffeePageState extends State<LoadingCoffeePage> {
         return;
       }
 
-      Navigator.of(context).pushReplacement(
+      await Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => VideoPage(coffee: coffee)),
       );
+      if (!mounted) return;
+      Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
       Navigator.of(context).pop();
@@ -550,6 +569,29 @@ class _VideoPageState extends State<VideoPage> {
   ChewieController? _chewieController;
   bool _isLoading = true;
   String? _error;
+  bool _hasNavigatedToInfo = false;
+
+  void _openInfoMenu() {
+    if (!mounted || _hasNavigatedToInfo) return;
+    _hasNavigatedToInfo = true;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => InfoMenuPage(coffee: widget.coffee),
+      ),
+    );
+  }
+
+  void _onVideoProgress() {
+    if (_hasNavigatedToInfo || !_videoController.value.isInitialized) return;
+
+    final duration = _videoController.value.duration;
+    final position = _videoController.value.position;
+    if (duration.inMilliseconds <= 0) return;
+
+    if (position >= duration - const Duration(milliseconds: 300)) {
+      _openInfoMenu();
+    }
+  }
 
   @override
   void initState() {
@@ -569,6 +611,7 @@ class _VideoPageState extends State<VideoPage> {
       );
 
       await _videoController.initialize();
+      _videoController.addListener(_onVideoProgress);
       if (!mounted) return;
 
       setState(() {
@@ -606,6 +649,7 @@ class _VideoPageState extends State<VideoPage> {
 
   @override
   void dispose() {
+    _videoController.removeListener(_onVideoProgress);
     _videoController.pause();
     _chewieController?.dispose();
     _videoController.dispose();
@@ -657,10 +701,7 @@ class _VideoPageState extends State<VideoPage> {
                               height: 50,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (_) =>
-                                        InfoMenuPage(coffee: widget.coffee),
-                                  ));
+                                  _openInfoMenu();
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppTheme.secondbutton,
@@ -965,259 +1006,3 @@ class InfoDetailPage extends StatelessWidget {
   }
 }
 
-/* ---------------------- Settings Page ---------------------- */
-class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
-
-  @override
-  State<SettingsPage> createState() => _SettingsPageState();
-}
-
-class _SettingsPageState extends State<SettingsPage> {
-  late TextEditingController _apiUrlController;
-  late TextEditingController _staticUrlController;
-  bool _isSaving = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _apiUrlController = TextEditingController(text: serverUrl);
-    _staticUrlController = TextEditingController(text: staticServerUrl);
-  }
-
-  @override
-  void dispose() {
-    _apiUrlController.dispose();
-    _staticUrlController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _saveSettings() async {
-    setState(() => _isSaving = true);
-
-    try {
-      final apiUrl = _apiUrlController.text.trim();
-      final staticUrl = _staticUrlController.text.trim();
-
-      // Validate URLs
-      if (apiUrl.isEmpty || staticUrl.isEmpty) {
-        throw Exception('URL nesmí být prázdná');
-      }
-
-      if (!apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
-        throw Exception('API URL musí začínat http:// nebo https://');
-      }
-
-      if (!staticUrl.startsWith('http://') &&
-          !staticUrl.startsWith('https://')) {
-        throw Exception('Static URL musí začínat http:// nebo https://');
-      }
-
-      // Save settings
-      await saveServerSettings(apiUrl, staticUrl);
-
-      // Reinitialize client
-      client = Client(serverUrl)
-        ..connectivityMonitor = FlutterConnectivityMonitor();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-                'Nastavení uloženo! Restartujte aplikaci pro aplikování změn.'),
-            backgroundColor: Color(0xFF8BC34A),
-            duration: Duration(seconds: 3),
-          ),
-        );
-        Navigator.of(context).pop();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Chyba: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
-    }
-  }
-
-  Future<void> _resetToDefaults() async {
-    setState(() {
-      _apiUrlController.text = 'http://34.122.70.47:8080/';
-      _staticUrlController.text = 'http://34.122.70.47:8090/';
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.surface,
-      appBar: AppBar(
-        backgroundColor: AppTheme.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Nastavení serveru',
-          style: TextStyle(color: AppTheme.black, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue.shade200),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, color: Colors.blue.shade700),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text(
-                        'Pro debugování můžete změnit adresu serveru.',
-                        style: TextStyle(fontSize: 13, height: 1.4),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'API Server URL',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _apiUrlController,
-                decoration: InputDecoration(
-                  hintText: 'http://34.122.70.47:8080/',
-                  prefixIcon: const Icon(Icons.dns),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-                keyboardType: TextInputType.url,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Port pro REST API endpointy',
-                style: TextStyle(fontSize: 12, color: AppTheme.black),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Static Server URL',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _staticUrlController,
-                decoration: InputDecoration(
-                  hintText: 'http://34.122.70.47:8090/',
-                  prefixIcon: const Icon(Icons.video_library),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-                keyboardType: TextInputType.url,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Port pro videa a obrázky',
-                style: TextStyle(fontSize: 12, color: AppTheme.black),
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _isSaving ? null : _saveSettings,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8BC34A),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    elevation: 2,
-                  ),
-                  child: _isSaving
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2),
-                        )
-                      : const Text('ULOŽIT',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: OutlinedButton(
-                  onPressed: _resetToDefaults,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF8BC34A),
-                    side: const BorderSide(color: Color(0xFF8BC34A), width: 2),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: const Text('OBNOVIT VÝCHOZÍ',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Aktuální nastavení:',
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'API: $serverUrl',
-                      style: const TextStyle(
-                          fontSize: 12, fontFamily: 'monospace'),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Static: $staticServerUrl',
-                      style: const TextStyle(
-                          fontSize: 12, fontFamily: 'monospace'),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

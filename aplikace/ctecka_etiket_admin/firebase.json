@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "public": "aplikace/ctecka_etiket_admin/build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
