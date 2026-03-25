@@ -15,6 +15,7 @@ jobs:
           channel: 'stable'
           architecture: x64
       - run: flutter pub get
+        working-directory: aplikace/ctecka_etiket_flutter
       
 
       - run: pod repo update
