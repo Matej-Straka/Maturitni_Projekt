@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "aplikace/ctecka_etiket_admin/build/web",
+    "public": "build/web",
     "ignore": [
       "firebase.json",
       "**/.*",
