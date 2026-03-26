@@ -24,7 +24,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  qr_code_scanner: ^1.0.1
+  qr_code_scanner: ^1.0.2
   serverpod_flutter: 2.9.1
   ctecka_etiket_client:
     path: ../ctecka_etiket_client
