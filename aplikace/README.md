@@ -191,23 +191,7 @@ Přihlašovací údaje:
 - `is_active` - Aktivní/neaktivní
 - `created_at`, `last_login` - Časové značky
 
-## Vývoj
 
-### Regenerace protokolů
-
-Po změně `.spy.yaml` souborů:
-
-```bash
-cd ctecka_etiket_server
-serverpod generate  # nebo $HOME/.pub-cache/bin/serverpod generate
-```
-
-### Vytvoření nové migrace
-
-```bash
-cd ctecka_etiket_server
-serverpod create-migration
-```
 
 ### Build pro produkci
 
@@ -230,14 +214,7 @@ cd ctecka_etiket_admin
 flutter build web
 ```
 
-## Poznámky
-
-- Autentizace je jednoduchá (username+password v každém požadavku). Pro produkci zvažte JWT nebo session management.
-- Video URL může být lokální asset nebo vzdálená URL.
-- Obrázky mohou být asset paths nebo HTTP(S) URL.
-- Pro produkční nasazení nezapomeňte změnit `serverUrl` v aplikacích.
-
 ## Autor
 
 Matěj Straka  
-Maturitní práce 2025
+Maturitní práce 2026
