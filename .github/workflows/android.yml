@@ -20,14 +20,14 @@ jobs:
       - run: flutter pub get
         working-directory: aplikace/ctecka_etiket_flutter
 
-      - run: flutter build apk --release --flavor dev
+      - run: flutter build apk --release
         working-directory: aplikace/ctecka_etiket_flutter
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: aplikace/ctecka_etiket_flutter/build/app/outputs/flutter-apk/app-dev-release.apk
+          file: aplikace/ctecka_etiket_flutter/build/app/outputs/flutter-apk/app-release.apk
           tag: v1.0
           overwrite: false
           body: "This is first release"
