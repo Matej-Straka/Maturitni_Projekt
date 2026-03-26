@@ -1,11 +1,11 @@
 import 'package:ctecka_etiket_client/ctecka_etiket_client.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'admin_theme.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
-import 'dart:io';
 import 'dart:convert';
 
 late final Client client;
@@ -18,15 +18,38 @@ String getMediaUrl(String url) {
   if (url.startsWith('http')) {
     return url;
   }
-  // Files are served from static server on port 8090
-  // Remove /uploads/ prefix since static server serves directly from web/uploads folder
-  final cleanUrl = url.startsWith('/uploads/') ? url.substring(8) : url;
-  return '$staticServerUrl/$cleanUrl';
+
+  final base = staticServerUrl.endsWith('/')
+      ? staticServerUrl.substring(0, staticServerUrl.length - 1)
+      : staticServerUrl;
+  final path = url.startsWith('/') ? url : '/$url';
+  final uploadsPath = path.startsWith('/uploads/') ? path : '/uploads$path';
+
+  return '$base$uploadsPath';
 }
 
-Future<String?> uploadFile(File file, String type, String username, String password) async {
+Future<String?> uploadFile(PlatformFile file, String type, String username, String password) async {
   try {
-    final fileName = file.path.split('/').last;
+    final fileName = file.name;
+
+    // Web cannot reliably call the static multipart endpoint because of CORS.
+    // Use Serverpod endpoint that accepts base64 and stores media metadata.
+    if (kIsWeb) {
+      if (file.bytes == null) {
+        print('Upload error: no file bytes available on web');
+        return null;
+      }
+
+      final fileDataBase64 = base64Encode(file.bytes!);
+      return await client.admin.uploadFileBase64(
+        username,
+        password,
+        fileName,
+        fileDataBase64,
+        type,
+      );
+    }
+
     final base = staticServerUrl.endsWith('/') ? staticServerUrl : '$staticServerUrl/';
     final uploadUri = Uri.parse('${base}upload');
 
@@ -34,7 +57,19 @@ Future<String?> uploadFile(File file, String type, String username, String passw
     if (uploadToken.isNotEmpty) {
       request.headers['x-upload-token'] = uploadToken;
     }
-    request.files.add(await http.MultipartFile.fromPath('file', file.path, filename: fileName));
+
+    if (file.bytes != null) {
+      request.files.add(
+        http.MultipartFile.fromBytes('file', file.bytes!, filename: fileName),
+      );
+    } else if (file.path != null && file.path!.isNotEmpty) {
+      request.files.add(
+        await http.MultipartFile.fromPath('file', file.path!, filename: fileName),
+      );
+    } else {
+      print('Upload error: file has neither bytes nor path');
+      return null;
+    }
 
     final response = await request.send();
     final responseBody = await response.stream.bytesToString();
@@ -1171,13 +1206,14 @@ class _VideosPageState extends State<VideosPage> {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['jpg', 'jpeg', 'png', 'mp4', 'mov', 'avi'],
+      withData: true,
     );
 
-    if (result != null && result.files.first.path != null) {
+    if (result != null && result.files.isNotEmpty) {
       setState(() => _uploading = true);
       
-      final file = File(result.files.first.path!);
-      final fileName = result.files.first.name;
+      final file = result.files.first;
+      final fileName = file.name;
       final extension = fileName.split('.').last.toLowerCase();
       
       String mimeType;
@@ -1185,6 +1221,16 @@ class _VideosPageState extends State<VideosPage> {
         mimeType = 'image/$extension';
       } else {
         mimeType = 'video/$extension';
+      }
+
+      if (file.bytes == null && (file.path == null || file.path!.isEmpty)) {
+        setState(() => _uploading = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Soubor nelze načíst'), backgroundColor: Colors.red),
+          );
+        }
+        return;
       }
 
       final url = await uploadFile(file, mimeType, widget.username, widget.password);
