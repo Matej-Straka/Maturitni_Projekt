@@ -1,0 +1,27 @@
+name: Build and distribute
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Android build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: cedvdb/action-flutter-build-android@v1
+        with:
+          build-cmd: flutter build apk --release --flavor dev
+          working-directory: aplikace/ctecka_etiket_flutter
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: aplikace/ctecka_etiket_flutter/build/app/outputs/flutter-apk/app-dev-release.apk
+          tag: v1.0
+          overwrite: false
+          body: "This is first release"
