@@ -9,13 +9,19 @@ jobs:
   build:
     name: Android build
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
 
-      - uses: cedvdb/action-flutter-build-android@v1
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
         with:
-          build-cmd: flutter build apk --release --flavor dev
-          working-directory: aplikace/ctecka_etiket_flutter
+          flutter-version: 3.19.0
+
+      - run: flutter pub get
+        working-directory: aplikace/ctecka_etiket_flutter
+
+      - run: flutter build apk --release --flavor dev
+        working-directory: aplikace/ctecka_etiket_flutter
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
