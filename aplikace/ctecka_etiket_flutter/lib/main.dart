@@ -5,12 +5,14 @@ import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'theme/app_theme.dart';
 
 late Client client;
 const String serverUrl = 'https://ctecka-etiket.duckdns.org/';
 const String staticServerUrl = 'https://ctecka-etiket.duckdns.org/';
+const String _tutorialSeenKey = 'tutorial_seen';
 
 // Helper function to get full URL for media files
 String getMediaUrl(String url) {
@@ -29,29 +31,37 @@ String getMediaUrl(String url) {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final tutorialSeen = prefs.getBool(_tutorialSeenKey) ?? false;
+  if (!tutorialSeen) {
+    await prefs.setBool(_tutorialSeenKey, true);
+  }
+
   client = Client(serverUrl)
     ..connectivityMonitor = FlutterConnectivityMonitor();
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  runApp(const MyApp());
+  runApp(MyApp(showOnboarding: !tutorialSeen));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool showOnboarding;
+  const MyApp({super.key, required this.showOnboarding});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Čtečka etiket',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      home: const OnboardingFlow(),
+      home: showOnboarding ? const OnboardingFlow() : const QRScannerPage(),
     );
   }
 }
 
 /* ---------------------- Onboarding ---------------------- */
 class OnboardingFlow extends StatefulWidget {
-  const OnboardingFlow({super.key});
+  final bool fromScanner;
+  const OnboardingFlow({super.key, this.fromScanner = false});
   @override
   State<OnboardingFlow> createState() => _OnboardingFlowState();
 }
@@ -61,9 +71,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   int _page = 0;
 
   static const List<String> _onboardingImages = [
-    'web/icons/Icon-192.png',
-    'web/icons/Icon-maskable-192.png',
-    'web/icons/Icon-512.png',
+    'web/icons/Page1.png',
+    'web/icons/Page2.png',
+    'web/icons/Page3.png',
   ];
 
   @override
@@ -72,7 +82,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     super.dispose();
   }
 
-  Widget _buildPage(String title, String body, String imagePath) {
+  Widget _buildPage(String title, String body, String imagePath, double width, double height) {
     return Container(
 
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 30),
@@ -95,11 +105,10 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             },
             child: Container(
               key: ValueKey(imagePath),
-              width: 220,
-              height: 220,
-              padding: const EdgeInsets.all(20),
+              width: width,
+              height: height,
+              padding: const EdgeInsets.all(0),
               decoration: BoxDecoration(
-                color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -178,8 +187,13 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeInOut);
                 } else {
-                  Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const QRScannerPage()));
+                  if (widget.fromScanner) {
+                    Navigator.of(context).pop();
+                  } else {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => const QRScannerPage()),
+                    );
+                  }
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -191,7 +205,10 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                     borderRadius: BorderRadius.circular(8)),
                 elevation: 1,
               ),
-              child: Text(_page < 2 ? 'POKRAČOVAT' : 'POJĎME NA TO',
+                child: Text(
+                  _page < 2
+                    ? 'POKRAČOVAT'
+                    : (widget.fromScanner ? 'ZAVŘÍT TUTORIAL' : 'POJĎME NA TO'),
                   style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
@@ -220,17 +237,17 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             _buildPage(
               'VÍTEJTE U PŘEDSTAVENÍ KÁV',
               'Tato aplikace slouží jako interaktivní představení naších káv pomocí QR kódů na jejich obalu',
-              _onboardingImages[0],
+              _onboardingImages[0], 700, 200
             ),
             _buildPage(
               '1. KROK',
               'Načtete QR kód na obalu jedné z naších káv',
-              _onboardingImages[1],
+              _onboardingImages[1], 300, 300
             ),
             _buildPage(
               '2. KROK',
-              'Přehraje se video a poté vyskočí menu kde můžete najít složení a více informací o kávě',
-              _onboardingImages[2],
+              'Přehraje se video a poté vyskočí menu, kde můžete najít složení a více informací o kávě',
+              _onboardingImages[2], 160, 300
             ),
           ],
         ),
@@ -374,15 +391,35 @@ class _QRScannerPageState extends State<QRScannerPage>
                     colors: [Colors.transparent, Colors.transparent],
                   ),
                 ),
-                child: const Text(
-                  'Namiřte fotoaparát na QR kód',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 25,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: "Snug Variable",
-                  ),
-                  textAlign: TextAlign.center,
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Namiřte fotoaparát na QR kód',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 25,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: "Snug Variable",
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.help_outline, color: Colors.white),
+                      tooltip: 'Tutorial',
+                      onPressed: () async {
+                        _deactivateScanner();
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const OnboardingFlow(fromScanner: true),
+                          ),
+                        );
+                        if (!mounted) return;
+                        _activateScanner();
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
